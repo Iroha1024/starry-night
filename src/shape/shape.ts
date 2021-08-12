@@ -1,31 +1,37 @@
-export interface Shape extends CommonConfig {
-  paint: (ctx: CanvasRenderingContext2D) => void
+type PaintStyle = string | CanvasGradient | CanvasPattern
+
+export interface ShapeConfig {
+  layer?: number
+  order?: number
+  fillStyle?: PaintStyle
+  strokeStyle?: PaintStyle
 }
 
-interface CommonConfig {
+export class Shape {
   layer: number
   order: number
-}
+  fillStyle: PaintStyle
+  strokeStyle: PaintStyle
 
-export const initShapeConfig = <T extends Partial<CommonConfig>>(config: T) => {
-  const { layer = 0, order = 0 } = config
-  return {
-    ...config,
-    layer,
-    order,
+  constructor(config: ShapeConfig) {
+    const { layer, order, fillStyle, strokeStyle } = config
+    this.layer = layer ?? 0
+    this.order = order ?? 0
+    this.fillStyle = fillStyle ?? ''
+    this.strokeStyle = strokeStyle ?? ''
+  }
+
+  paint(ctx: CanvasRenderingContext2D) {}
+
+  rawPaint(ctx: CanvasRenderingContext2D, process: () => void) {
+    ctx.beginPath()
+    process()
+    ctx.closePath()
+    if (this.fillStyle) {
+      ctx.fillStyle = this.fillStyle
+      ctx.fill()
+    }
+    this.strokeStyle && (ctx.strokeStyle = this.strokeStyle)
+    ctx.stroke()
   }
 }
-
-export interface CanvasStyleConfig {
-  fillStyle?: string | CanvasGradient | CanvasPattern
-  strokeStyle?: string | CanvasGradient | CanvasPattern
-}
-
-export const paint = (ctx: CanvasRenderingContext2D, style: CanvasStyleConfig) => {
-  const { fillStyle, strokeStyle } = style
-  fillStyle && (ctx.fillStyle = fillStyle) && ctx.fill()
-  strokeStyle && (ctx.strokeStyle = strokeStyle)
-  ctx.stroke()
-}
-
-export type ShapeConfig = Partial<CommonConfig> & CanvasStyleConfig
