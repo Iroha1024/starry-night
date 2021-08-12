@@ -4,25 +4,28 @@ const stage = createStage('#canvas', {
   width: 800,
   height: 600,
 })
-const { shapeContainer } = stage
+const { shapeContainer, eventPool } = stage
 
-shapeContainer.addShape(
-  new Rectangle({
-    x: 0,
-    y: 0,
-    w: 100,
-    h: 100,
-    fillStyle: 'red',
-  })
-)
-shapeContainer.addShape(
-  new Rectangle({
-    x: 50,
-    y: 50,
-    w: 100,
-    h: 100,
-    fillStyle: 'blue',
-  })
-)
+const a = new Rectangle({
+  x: 0,
+  y: 0,
+  w: 100,
+  h: 100,
+  fillStyle: 'red',
+  layer: 2,
+})
+
+shapeContainer.add(a)
+eventPool.add(a)
+
+const b = new Rectangle({
+  x: 50,
+  y: 50,
+  w: 100,
+  h: 100,
+  fillStyle: 'blue',
+})
+shapeContainer.add(b)
+eventPool.add(b)
 
 stage.paint()

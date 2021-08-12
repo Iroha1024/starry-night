@@ -1,4 +1,5 @@
 import { ShapeContainer } from './shape/index'
+import { EventPool } from './event/index'
 
 interface StageConfig {
   width?: number
@@ -10,6 +11,7 @@ class Stage {
   width: number
   height: number
   shapeContainer = new ShapeContainer()
+  eventPool = new EventPool()
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas
@@ -38,5 +40,6 @@ export const createStage = (el: string, config?: StageConfig): Stage => {
   }
   return new Stage(canvas)
 }
+
 
 export * from './shape/index'
