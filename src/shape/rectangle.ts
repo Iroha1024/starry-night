@@ -28,9 +28,18 @@ export class Rectangle extends Shape {
     this.height = h
   }
 
-  paint(ctx: CanvasRenderingContext2D) {
+  override paint(ctx: CanvasRenderingContext2D) {
     super.rawPaint(ctx, () => {
       ctx.rect(this.x, this.y, this.width, this.height)
     })
+  }
+
+  override isInside(point: { x: number; y: number }) {
+    const { x, y } = point
+    const x1 = this.x,
+      x2 = this.x + this.width,
+      y1 = this.y,
+      y2 = this.y + this.height
+    return x > x1 && x < x2 && y > y1 && y < y2
   }
 }

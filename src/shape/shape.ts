@@ -41,4 +41,8 @@ export class Shape {
   static compare(a: Shape, b: Shape) {
     return a.layer != b.layer ? a.layer - b.layer : a.order - b.order
   }
+
+  isInside(point: { x: number; y: number }) {
+    return false
+  }
 }

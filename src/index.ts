@@ -1,5 +1,6 @@
 import { ShapeContainer } from './shape/index'
 import { EventPool } from './event/index'
+import type { EmitNameType } from './event/index'
 
 interface StageConfig {
   width?: number
@@ -17,6 +18,7 @@ class Stage {
     this.canvas = canvas
     this.width = canvas.width
     this.height = canvas.height
+    this.initEvent()
   }
 
   paint() {
@@ -25,6 +27,13 @@ class Stage {
       throw new Error('can not getContext 2d')
     }
     this.shapeContainer.toList().forEach((shape) => shape.paint(ctx))
+  }
+
+  initEvent() {
+    const eventNameList: Array<EmitNameType> = ['click', 'dblclick']
+    eventNameList.forEach((type) => {
+      this.canvas.addEventListener(type, (event) => this.eventPool.emit(event))
+    })
   }
 }
 
@@ -40,6 +49,5 @@ export const createStage = (el: string, config?: StageConfig): Stage => {
   }
   return new Stage(canvas)
 }
-
 
 export * from './shape/index'
