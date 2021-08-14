@@ -1,9 +1,14 @@
-import { Shape } from '../shape/index'
+import { Shape, ShapeContainer } from '../shape/index'
 
 export class EventPool {
+  private shapeContainer: ShapeContainer
   private list: EventProxy[] = []
   private cacheFlag = false
   private cacheList: EventProxy[]
+
+  constructor(shapeContainer: ShapeContainer) {
+    this.shapeContainer = shapeContainer
+  }
 
   add(shape: Shape, proxyConfig?: RegisterEventConfig) {
     this.cacheFlag = true
@@ -26,6 +31,9 @@ export class EventPool {
     return this.findIndex(shape) != -1
   }
 
+  /**
+   * sort: layer Dsce
+   */
   toList() {
     if (!this.cacheFlag) return this.cacheList
     this.cacheList = [...this.list].sort((a, b) => Shape.compare(a.shape, b.shape)).reverse()
@@ -34,15 +42,26 @@ export class EventPool {
   }
 
   emit(event: EmitEventType) {
+    if (event instanceof MouseEvent && event.type == 'click') {
+      const { offsetX: x, offsetY: y } = event
+      const shape = this.shapeContainer.getTopLayerShape({
+        x,
+        y,
+      })
+      if (shape) {
+        this.shapeContainer.selectedShapeList.clear()
+        this.shapeContainer.selectedShapeList.add(shape)
+      }
+    }
     this.toList().forEach((proxy) => {
       if (event instanceof MouseEvent) {
         const { offsetX: x, offsetY: y } = event
         if (
+          proxy.hasEvent(event.type) &&
           proxy.shape.isInside({
             x,
             y,
-          }) &&
-          proxy.hasEvent(event.type)
+          })
         ) {
           proxy.handle(event)
         }

@@ -1,6 +1,7 @@
 import { ShapeContainer } from './shape/index'
 import { EventPool } from './event/index'
 import type { EmitNameType } from './event/index'
+import { eventEmitter } from './eventEmitter'
 
 interface StageConfig {
   width?: number
@@ -11,28 +12,34 @@ class Stage {
   canvas: HTMLCanvasElement
   width: number
   height: number
+  ctx: CanvasRenderingContext2D
   shapeContainer = new ShapeContainer()
-  eventPool = new EventPool()
+  eventPool = new EventPool(this.shapeContainer)
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas
     this.width = canvas.width
     this.height = canvas.height
-    this.initEvent()
-  }
-
-  paint() {
     const ctx = this.canvas.getContext('2d')
     if (!ctx) {
       throw new Error('can not getContext 2d')
     }
-    this.shapeContainer.toList().forEach((shape) => shape.paint(ctx))
+    this.ctx = ctx
+    this.initEvent()
+  }
+
+  paint() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    this.shapeContainer.toList().forEach((shape) => shape.paint(this.ctx))
   }
 
   initEvent() {
-    const eventNameList: Array<EmitNameType> = ['click', 'dblclick']
+    const eventNameList: Array<EmitNameType> = ['click', 'mousedown', 'mousemove', 'mouseup']
     eventNameList.forEach((type) => {
       this.canvas.addEventListener(type, (event) => this.eventPool.emit(event))
+    })
+    eventEmitter.on('selectShape', () => {
+      this.paint()
     })
   }
 }

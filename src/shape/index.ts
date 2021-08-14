@@ -1,9 +1,12 @@
+import type { Point } from './shape'
 import { Shape } from './shape'
+import { eventEmitter } from '../eventEmitter'
 
 export class ShapeContainer {
   private layerMap = new Map<number, Array<Shape>>()
   private cacheFlag = false
   private cacheList: Shape[]
+  selectedShapeList = new ShapeSelection()
 
   add(shape: Shape) {
     this.cacheFlag = true
@@ -28,6 +31,9 @@ export class ShapeContainer {
     return this.cacheList.findIndex((item) => item == shape) != -1
   }
 
+  /**
+   * sort: layer Asce
+   */
   toList() {
     if (!this.cacheFlag) return this.cacheList
     this.cacheList = []
@@ -43,6 +49,39 @@ export class ShapeContainer {
     })
     this.cacheFlag = false
     return this.cacheList
+  }
+
+  getTopLayerShape(point: Point) {
+    const list = this.toList()
+    for (let i = list.length - 1; i >= 0; i--) {
+      const shape = list[i]
+      if (shape.isInside(point)) {
+        return shape
+      }
+    }
+    return null
+  }
+}
+
+class ShapeSelection {
+  private set = new Set<Shape>()
+
+  add(shape: Shape) {
+    this.set.add(shape)
+    shape.isSelected = true
+    eventEmitter.emit('selectShape')
+  }
+
+  remove(shape: Shape) {
+    shape.isSelected = false
+    eventEmitter.emit('selectShape')
+    return this.set.delete(shape)
+  }
+
+  clear() {
+    ;[...this.set].forEach((shape) => (shape.isSelected = false))
+    this.set.clear()
+    eventEmitter.emit('selectShape')
   }
 }
 

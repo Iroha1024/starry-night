@@ -18,7 +18,7 @@ const a = new Rectangle({
 shapeContainer.add(a)
 eventPool.add(a, {
   click(shape) {
-    console.log(shape.fillStyle)
+    // console.log(shape.fillStyle)
   },
 })
 
@@ -32,7 +32,7 @@ const b = new Rectangle({
 shapeContainer.add(b)
 eventPool.add(b, {
   click(shape) {
-    console.log(shape.fillStyle)
+    // console.log(shape.fillStyle)
   },
 })
 
@@ -47,7 +47,7 @@ const c = new Rectangle({
 shapeContainer.add(c)
 eventPool.add(c, {
   click(shape) {
-    console.log(shape.fillStyle)
+    // console.log(shape.fillStyle)
   },
 })
 
@@ -63,9 +63,9 @@ const d = new Rectangle({
 shapeContainer.add(d)
 eventPool.add(d, {
   click(shape) {
-    console.log(shape.fillStyle)
+    // console.log(shape.fillStyle)
   },
 })
-console.log(eventPool.toList())
 
+console.log(stage)
 stage.paint()

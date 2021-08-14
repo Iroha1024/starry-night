@@ -1,4 +1,4 @@
-import type { ShapeConfig } from './shape'
+import type { ShapeConfig, Point } from './shape'
 import { Shape } from './shape'
 
 interface RectangleConfig extends ShapeConfig {
@@ -34,7 +34,7 @@ export class Rectangle extends Shape {
     })
   }
 
-  override isInside(point: { x: number; y: number }) {
+  override isInside(point: Point) {
     const { x, y } = point
     const x1 = this.x,
       x2 = this.x + this.width,
