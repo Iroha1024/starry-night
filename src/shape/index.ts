@@ -15,8 +15,8 @@ export class ShapeContainer {
   }
 
   remove(shape: Shape) {
-    this.cacheFlag = true
     if (!this.has(shape)) return false
+    this.cacheFlag = true
     const { layer } = shape
     const shapeList = this.layerMap.get(layer)!
     const index = shapeList.indexOf(shape)

@@ -2,13 +2,17 @@ import { Shape } from '../shape/index'
 
 export class EventPool {
   private list: EventProxy[] = []
+  private cacheFlag = false
+  private cacheList: EventProxy[]
 
   add(shape: Shape, proxyConfig?: RegisterEventConfig) {
+    this.cacheFlag = true
     this.list.push(new EventProxy(shape, proxyConfig))
   }
 
   remove(shape: Shape) {
     if (!this.has(shape)) return false
+    this.cacheFlag = true
     const index = this.findIndex(shape)
     this.list.splice(index, 1)
     return true
@@ -23,7 +27,10 @@ export class EventPool {
   }
 
   toList() {
-    return [...this.list].sort((a, b) => Shape.compare(a.shape, b.shape)).reverse()
+    if (!this.cacheFlag) return this.cacheList
+    this.cacheList = [...this.list].sort((a, b) => Shape.compare(a.shape, b.shape)).reverse()
+    this.cacheFlag = false
+    return this.cacheList
   }
 
   emit(event: EmitEventType) {
