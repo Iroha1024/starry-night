@@ -1,24 +1,33 @@
 import { Shape } from '../shape/index'
 
 export class EventPool {
-  list: EventProxy[] = []
+  private list: EventProxy[] = []
 
   add(shape: Shape, proxyConfig?: RegisterEventConfig) {
-    for (let i = -1, j; i < this.list.length; i++) {
-      j = i + 1
-      let next = this.list[j]
-      if (!next) {
-        this.list[j] = new EventProxy(shape, proxyConfig)
-        break
-      } else if (Shape.compare(shape, next.shape) >= 0) {
-        this.list.splice(j, 0, new EventProxy(shape, proxyConfig))
-        break
-      }
-    }
+    this.list.push(new EventProxy(shape, proxyConfig))
+  }
+
+  remove(shape: Shape) {
+    if (!this.has(shape)) return false
+    const index = this.findIndex(shape)
+    this.list.splice(index, 1)
+    return true
+  }
+
+  private findIndex(shape: Shape) {
+    return this.list.findIndex((item) => item.shape == shape)
+  }
+
+  has(shape: Shape) {
+    return this.findIndex(shape) != -1
+  }
+
+  toList() {
+    return [...this.list].sort((a, b) => Shape.compare(a.shape, b.shape)).reverse()
   }
 
   emit(event: EmitEventType) {
-    this.list.forEach((proxy) => {
+    this.toList().forEach((proxy) => {
       if (event instanceof MouseEvent) {
         const { offsetX: x, offsetY: y } = event
         if (

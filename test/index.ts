@@ -51,4 +51,21 @@ eventPool.add(c, {
   },
 })
 
+const d = new Rectangle({
+  x: 120,
+  y: 60,
+  w: 50,
+  h: 50,
+  fillStyle: 'yellow',
+  layer: 2,
+})
+
+shapeContainer.add(d)
+eventPool.add(d, {
+  click(shape) {
+    console.log(shape.fillStyle)
+  },
+})
+console.log(eventPool.toList())
+
 stage.paint()
