@@ -1,6 +1,6 @@
-import { ShapeContainer } from './shape/index'
+import { Shape, ShapeContainer } from './shape/index'
 import { EventPool } from './event/index'
-import type { EmitNameType } from './event/index'
+import type { EmitNameType, RegisterEventConfig } from './event/index'
 import { eventEmitter } from './eventEmitter'
 
 interface StageConfig {
@@ -41,6 +41,11 @@ class Stage {
     eventEmitter.on('selectShape', () => {
       this.paint()
     })
+  }
+
+  add(shape: Shape, registerEventConfig?: RegisterEventConfig) {
+    this.shapeContainer.add(shape)
+    this.eventPool.add(shape, registerEventConfig)
   }
 }
 

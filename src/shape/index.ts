@@ -5,10 +5,11 @@ import { eventEmitter } from '../eventEmitter'
 export class ShapeContainer {
   private layerMap = new Map<number, Array<Shape>>()
   private cacheFlag = false
-  private cacheList: Shape[]
+  private cacheList: Shape[] = []
   selectedShapeList = new ShapeSelection()
 
   add(shape: Shape) {
+    if (this.has(shape)) return
     this.cacheFlag = true
     const { layer } = shape
     if (!this.layerMap.has(layer)) {
@@ -28,7 +29,7 @@ export class ShapeContainer {
   }
 
   has(shape: Shape) {
-    return this.cacheList.findIndex((item) => item == shape) != -1
+    return this.toList().findIndex((item) => item == shape) != -1
   }
 
   /**
@@ -86,4 +87,5 @@ class ShapeSelection {
 }
 
 export { Shape } from './shape'
+export type { ShapeConfig, Point } from './shape'
 export { Rectangle } from './rectangle'

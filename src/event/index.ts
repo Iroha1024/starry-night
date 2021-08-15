@@ -4,13 +4,14 @@ export class EventPool {
   private shapeContainer: ShapeContainer
   private list: EventProxy[] = []
   private cacheFlag = false
-  private cacheList: EventProxy[]
+  private cacheList: EventProxy[] = []
 
   constructor(shapeContainer: ShapeContainer) {
     this.shapeContainer = shapeContainer
   }
 
   add(shape: Shape, proxyConfig?: RegisterEventConfig) {
+    if (this.has(shape)) return
     this.cacheFlag = true
     this.list.push(new EventProxy(shape, proxyConfig))
   }
@@ -24,7 +25,7 @@ export class EventPool {
   }
 
   private findIndex(shape: Shape) {
-    return this.list.findIndex((item) => item.shape == shape)
+    return this.toList().findIndex((item) => item.shape == shape)
   }
 
   has(shape: Shape) {
@@ -111,7 +112,7 @@ type EmitEventType = MouseEvent | KeyboardEvent
 
 export type EmitNameType = KeysMatching<HTMLElementEventMap, EmitEventType>
 
-type RegisterEventConfig = {
+export type RegisterEventConfig = {
   [N in EmitNameType]?: EventHandler
 }
 

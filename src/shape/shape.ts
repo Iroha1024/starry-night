@@ -1,50 +1,48 @@
 import { nanoid } from 'nanoid'
 
-type PaintStyle = string | CanvasGradient | CanvasPattern
+type FillStyle = CanvasFillStrokeStyles['fillStyle']
+type StrokeStyle = CanvasFillStrokeStyles['strokeStyle']
 
 export interface ShapeConfig {
+  x: number
+  y: number
   layer?: number
   order?: number
-  fillStyle?: PaintStyle
-  strokeStyle?: PaintStyle
+  fillStyle?: FillStyle
+  strokeStyle?: StrokeStyle
   lineWidth?: number
 }
 
 export class Shape {
   readonly id = nanoid()
+  x: number
+  y: number
   layer: number
   order: number
-  fillStyle: PaintStyle
-  strokeStyle: PaintStyle
+  isFill = false
+  fillStyle: FillStyle
+  isStroke = false
+  strokeStyle: StrokeStyle
   lineWidth: number
   isSelected = false
 
   constructor(config: ShapeConfig) {
-    const { layer, order, fillStyle, strokeStyle, lineWidth } = config
+    const { x, y, layer, order, fillStyle, strokeStyle, lineWidth } = config
+    this.x = x
+    this.y = y
     this.layer = layer ?? 0
     this.order = order ?? 0
+    fillStyle != undefined && (this.isFill = true)
     this.fillStyle = fillStyle ?? ''
+    strokeStyle != undefined && (this.isStroke = true)
     this.strokeStyle = strokeStyle ?? ''
     this.lineWidth = lineWidth ?? 2
   }
 
   paint(ctx: CanvasRenderingContext2D) {}
 
-  paintSelection(ctx: CanvasRenderingContext2D) {
-    if (this.isSelected) {
-      ctx.setLineDash([10, 5])
-    } else {
-      ctx.setLineDash([])
-    }
-  }
-
-  private setDefaultPaintStyle(ctx: CanvasRenderingContext2D) {
-    if (this.fillStyle) {
-      ctx.fillStyle = this.fillStyle
-      ctx.fill()
-    }
-    ctx.strokeStyle = this.strokeStyle
-    ctx.lineWidth = this.lineWidth
+  protected selectShape(ctx: CanvasRenderingContext2D) {
+    ctx.setLineDash([10, 5])
   }
 
   rawPaint(ctx: CanvasRenderingContext2D, process: () => void) {
@@ -53,10 +51,19 @@ export class Shape {
     process()
     ctx.closePath()
     ctx.clip()
-    this.setDefaultPaintStyle(ctx)
-    this.paintSelection(ctx)
-    ctx.lineWidth *= 2
-    ctx.stroke()
+    if (this.isFill) {
+      ctx.fillStyle = this.fillStyle
+      ctx.fill()
+    }
+    if (this.isSelected) {
+      this.selectShape(ctx)
+    }
+    ctx.lineWidth = this.lineWidth
+    if (this.isStroke) {
+      ctx.strokeStyle = this.strokeStyle
+      ctx.lineWidth *= 2
+      ctx.stroke()
+    }
     ctx.restore()
   }
 

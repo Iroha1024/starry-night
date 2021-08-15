@@ -4,7 +4,6 @@ const stage = createStage('#canvas', {
   width: 800,
   height: 600,
 })
-const { shapeContainer, eventPool } = stage
 
 const a = new Rectangle({
   x: 0,
@@ -15,10 +14,10 @@ const a = new Rectangle({
   layer: 2,
 })
 
-shapeContainer.add(a)
-eventPool.add(a, {
+// stage.add(a)
+stage.add(a, {
   click(shape) {
-    // console.log(shape.fillStyle)
+    console.log('object')
   },
 })
 
@@ -28,13 +27,9 @@ const b = new Rectangle({
   w: 300,
   h: 100,
   fillStyle: 'blue',
+  strokeStyle: 'black',
 })
-shapeContainer.add(b)
-eventPool.add(b, {
-  click(shape) {
-    // console.log(shape.fillStyle)
-  },
-})
+stage.add(b)
 
 const c = new Rectangle({
   x: 100,
@@ -44,12 +39,7 @@ const c = new Rectangle({
   fillStyle: 'green',
   layer: 3,
 })
-shapeContainer.add(c)
-eventPool.add(c, {
-  click(shape) {
-    // console.log(shape.fillStyle)
-  },
-})
+stage.add(c)
 
 const d = new Rectangle({
   x: 120,
@@ -60,12 +50,7 @@ const d = new Rectangle({
   layer: 2,
 })
 
-shapeContainer.add(d)
-eventPool.add(d, {
-  click(shape) {
-    // console.log(shape.fillStyle)
-  },
-})
+stage.add(d)
 
 console.log(stage)
 stage.paint()
