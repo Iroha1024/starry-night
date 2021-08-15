@@ -39,6 +39,14 @@ export class Shape {
     this.lineWidth = lineWidth ?? 2
   }
 
+  setX(x: number) {
+    this.x = x
+  }
+
+  getX() {
+    return this.x
+  }
+
   paint(ctx: CanvasRenderingContext2D) {}
 
   protected selectShape(ctx: CanvasRenderingContext2D) {

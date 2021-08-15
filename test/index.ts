@@ -52,5 +52,15 @@ const d = new Rectangle({
 
 stage.add(d)
 
-console.log(stage)
+const { eventEmitter } = stage
+
+eventEmitter.on('selectShape', (shape) => {
+  if (shape) {
+    shape.setX(shape.getX() + 10)
+    eventEmitter.emit('repaint')
+  }
+})
+
 stage.paint()
+
+console.log(stage)

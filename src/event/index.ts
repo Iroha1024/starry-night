@@ -1,16 +1,13 @@
-import { Shape, ShapeContainer } from '../shape/index'
+import { Shape } from '../shape'
+import type { EmitEventType, EmitNameType } from '../operation'
 
 export class EventPool {
-  private shapeContainer: ShapeContainer
   private list: EventProxy[] = []
   private cacheFlag = false
   private cacheList: EventProxy[] = []
 
-  constructor(shapeContainer: ShapeContainer) {
-    this.shapeContainer = shapeContainer
-  }
-
   add(shape: Shape, proxyConfig?: RegisterEventConfig) {
+    if (!proxyConfig || Object.keys(proxyConfig).length == 0) return
     if (this.has(shape)) return
     this.cacheFlag = true
     this.list.push(new EventProxy(shape, proxyConfig))
@@ -42,18 +39,7 @@ export class EventPool {
     return this.cacheList
   }
 
-  emit(event: EmitEventType) {
-    if (event instanceof MouseEvent && event.type == 'click') {
-      const { offsetX: x, offsetY: y } = event
-      const shape = this.shapeContainer.getTopLayerShape({
-        x,
-        y,
-      })
-      if (shape) {
-        this.shapeContainer.selectedShapeList.clear()
-        this.shapeContainer.selectedShapeList.add(shape)
-      }
-    }
+  receive(event: EmitEventType) {
     this.toList().forEach((proxy) => {
       if (event instanceof MouseEvent) {
         const { offsetX: x, offsetY: y } = event
@@ -79,13 +65,11 @@ class EventProxy {
   shape: Shape
   eventMap = new Map<string, Array<EventHandler>>()
 
-  constructor(shape: Shape, config?: RegisterEventConfig) {
+  constructor(shape: Shape, config: RegisterEventConfig) {
     this.shape = shape
-    if (config) {
-      Object.entries(config).forEach(([key, value]) => {
-        this.add(key as EmitNameType, value)
-      })
-    }
+    Object.entries(config).forEach(([key, value]) => {
+      this.add(key as EmitNameType, value)
+    })
   }
 
   add(name: EmitNameType, eventHandler: EventHandler) {
@@ -105,12 +89,6 @@ class EventProxy {
     eventQueue!.forEach((handler) => handler(this.shape))
   }
 }
-
-type KeysMatching<T, V> = { [K in keyof T]: T[K] extends V ? K : never }[keyof T]
-
-type EmitEventType = MouseEvent | KeyboardEvent
-
-export type EmitNameType = KeysMatching<HTMLElementEventMap, EmitEventType>
 
 export type RegisterEventConfig = {
   [N in EmitNameType]?: EventHandler

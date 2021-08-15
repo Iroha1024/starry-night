@@ -1,10 +1,11 @@
 import { EventEmitter } from 'events'
+import type { Shape } from './shape'
 
-export const eventEmitter = new EventEmitter()
+export { EventEmitter }
 
 declare module 'events' {
   interface EventEmitter {
-    emit(type: 'selectShape'): boolean
-    on(type: 'selectShape', listenr: () => void): boolean
+    emit(type: 'selectShape', shape?: Shape): boolean
+    on(type: 'selectShape', listener: (shape?: Shape) => void): boolean
   }
 }

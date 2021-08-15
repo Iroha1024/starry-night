@@ -1,20 +1,21 @@
-import { Shape, ShapeContainer } from './shape/index'
-import { EventPool } from './event/index'
-import type { EmitNameType, RegisterEventConfig } from './event/index'
-import { eventEmitter } from './eventEmitter'
-
-interface StageConfig {
-  width?: number
-  height?: number
-}
+import type { Shape } from './shape'
+import { ShapeContainer } from './shape'
+import type { RegisterEventConfig } from './event'
+import { EventPool } from './event'
+import type { EmitNameType } from './operation'
+import { OperationLayer } from './operation'
+import { Painter } from './painter'
+import { EventEmitter } from './eventEmitter'
 
 class Stage {
   canvas: HTMLCanvasElement
   width: number
   height: number
-  ctx: CanvasRenderingContext2D
+  eventEmitter = new EventEmitter()
   shapeContainer = new ShapeContainer()
-  eventPool = new EventPool(this.shapeContainer)
+  eventPool = new EventPool()
+  operationLayer = new OperationLayer(this.eventEmitter, this.shapeContainer, this.eventPool)
+  painter: Painter
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas
@@ -24,22 +25,14 @@ class Stage {
     if (!ctx) {
       throw new Error('can not getContext 2d')
     }
-    this.ctx = ctx
+    this.painter = new Painter(this.eventEmitter, ctx, this.shapeContainer)
     this.initEvent()
-  }
-
-  paint() {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-    this.shapeContainer.toList().forEach((shape) => shape.paint(this.ctx))
   }
 
   initEvent() {
     const eventNameList: Array<EmitNameType> = ['click', 'mousedown', 'mousemove', 'mouseup']
     eventNameList.forEach((type) => {
-      this.canvas.addEventListener(type, (event) => this.eventPool.emit(event))
-    })
-    eventEmitter.on('selectShape', () => {
-      this.paint()
+      this.canvas.addEventListener(type, (event) => this.operationLayer.receive(event))
     })
   }
 
@@ -47,6 +40,20 @@ class Stage {
     this.shapeContainer.add(shape)
     this.eventPool.add(shape, registerEventConfig)
   }
+
+  remove(shape: Shape) {
+    this.shapeContainer.remove(shape)
+    this.eventPool.remove(shape)
+  }
+
+  paint() {
+    this.painter.paint()
+  }
+}
+
+interface StageConfig {
+  width?: number
+  height?: number
 }
 
 export const createStage = (el: string, config?: StageConfig): Stage => {

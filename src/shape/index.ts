@@ -1,12 +1,10 @@
 import type { Point } from './shape'
 import { Shape } from './shape'
-import { eventEmitter } from '../eventEmitter'
 
 export class ShapeContainer {
   private layerMap = new Map<number, Array<Shape>>()
   private cacheFlag = false
   private cacheList: Shape[] = []
-  selectedShapeList = new ShapeSelection()
 
   add(shape: Shape) {
     if (this.has(shape)) return
@@ -61,28 +59,6 @@ export class ShapeContainer {
       }
     }
     return null
-  }
-}
-
-class ShapeSelection {
-  private set = new Set<Shape>()
-
-  add(shape: Shape) {
-    this.set.add(shape)
-    shape.isSelected = true
-    eventEmitter.emit('selectShape')
-  }
-
-  remove(shape: Shape) {
-    shape.isSelected = false
-    eventEmitter.emit('selectShape')
-    return this.set.delete(shape)
-  }
-
-  clear() {
-    ;[...this.set].forEach((shape) => (shape.isSelected = false))
-    this.set.clear()
-    eventEmitter.emit('selectShape')
   }
 }
 
