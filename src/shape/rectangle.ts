@@ -25,6 +25,27 @@ export class Rectangle extends Shape {
     this.height = h
   }
 
+  override getRepaintKeys() {
+    const keys: Array<keyof Rectangle> = ['width', 'height']
+    return [...super.getRepaintKeys(), ...keys]
+  }
+
+  setWidth(w: number) {
+    this.width = w
+  }
+
+  getWidth() {
+    return this.width
+  }
+
+  setHeight(h: number) {
+    this.width = h
+  }
+
+  getHeight() {
+    return this.height
+  }
+
   override paint(ctx: CanvasRenderingContext2D) {
     this.rawPaint(ctx, () => {
       ctx.rect(this.x, this.y, this.width, this.height)

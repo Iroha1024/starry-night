@@ -1,4 +1,4 @@
-import { createStage, Rectangle } from '../src/index'
+import { createStage, Rectangle, ShapeProxy } from '../src/index'
 
 const stage = createStage('#canvas', {
   width: 800,
@@ -15,9 +15,10 @@ const a = new Rectangle({
 })
 
 // stage.add(a)
-stage.add(a, {
+const proxyA = stage.add(a, {
   click(shape) {
-    console.log('object')
+    stage.remove(shape)
+    console.log(stage)
   },
 })
 
@@ -57,7 +58,6 @@ const { eventEmitter } = stage
 eventEmitter.on('selectShape', (shape) => {
   if (shape) {
     shape.setX(shape.getX() + 10)
-    eventEmitter.emit('repaint')
   }
 })
 

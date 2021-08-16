@@ -7,5 +7,7 @@ declare module 'events' {
   interface EventEmitter {
     emit(type: 'selectShape', shape?: Shape): boolean
     on(type: 'selectShape', listener: (shape?: Shape) => void): boolean
+    emit(type: 'repaint'): boolean
+    on(type: 'repaint', listener: () => void): boolean
   }
 }

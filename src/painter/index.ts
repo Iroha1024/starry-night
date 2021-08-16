@@ -26,10 +26,9 @@ export class Painter {
   }
 
   handle() {
-    const paint = () => {
+    const repaint = () => {
       this.paint()
     }
-    this.eventEmitter.on('repaint', paint)
-    this.eventEmitter.on('selectShape', paint)
+    this.eventEmitter.on('repaint', repaint)
   }
 }

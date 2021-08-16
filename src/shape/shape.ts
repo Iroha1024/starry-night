@@ -39,12 +39,37 @@ export class Shape {
     this.lineWidth = lineWidth ?? 2
   }
 
+  getShape() {
+    return this
+  }
+
+  getRepaintKeys(): Array<string> {
+    const keys: Array<keyof Shape> = [
+      'x',
+      'y',
+      'layer',
+      'order',
+      'fillStyle',
+      'strokeStyle',
+      'lineWidth',
+    ]
+    return keys
+  }
+
   setX(x: number) {
     this.x = x
   }
 
   getX() {
     return this.x
+  }
+
+  setY(y: number) {
+    this.y = this.y
+  }
+
+  getY() {
+    return this.y
   }
 
   paint(ctx: CanvasRenderingContext2D) {}

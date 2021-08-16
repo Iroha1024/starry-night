@@ -1,32 +1,40 @@
 import type { Point } from './shape'
 import { Shape } from './shape'
+import type { EventEmitter } from '../eventEmitter'
 
 export class ShapeContainer {
-  private layerMap = new Map<number, Array<Shape>>()
+  private layerMap = new Map<number, Array<ShapeProxy>>()
   private cacheFlag = false
-  private cacheList: Shape[] = []
+  private cacheList: ShapeProxy[] = []
+  private eventEmitter: EventEmitter
+
+  constructor(eventEmitter: EventEmitter) {
+    this.eventEmitter = eventEmitter
+  }
 
   add(shape: Shape) {
     if (this.has(shape)) return
-    this.cacheFlag = true
     const { layer } = shape
     if (!this.layerMap.has(layer)) {
       this.layerMap.set(layer, [])
     }
-    this.layerMap.get(layer)!.push(shape)
+    const proxy = createShapeProxy(shape, this.eventEmitter)
+    this.layerMap.get(layer)!.push(proxy)
+    this.cacheFlag = true
+    return proxy
   }
 
-  remove(shape: Shape) {
+  remove(shape: ShapeProxy) {
     if (!this.has(shape)) return false
-    this.cacheFlag = true
     const { layer } = shape
     const shapeList = this.layerMap.get(layer)!
     const index = shapeList.indexOf(shape)
     shapeList.splice(index, 1)
+    this.cacheFlag = true
     return true
   }
 
-  has(shape: Shape) {
+  has(shape: ShapeProxy) {
     return this.toList().findIndex((item) => item == shape) != -1
   }
 
@@ -43,7 +51,7 @@ export class ShapeContainer {
     layerList.sort((a, b) => a - b)
     layerList.forEach((layer) => {
       const shapeList = this.layerMap.get(layer)!
-      ;[...shapeList].sort((a, b) => Shape.compare(a, b))
+      ;[...shapeList].sort((a, b) => Shape.compare(a.getShape(), b.getShape()))
       this.cacheList.push(...shapeList)
     })
     this.cacheFlag = false
@@ -62,6 +70,22 @@ export class ShapeContainer {
   }
 }
 
+const createShapeProxy = (shape: Shape, eventEmitter: EventEmitter): ShapeProxy => {
+  const proxy = new Proxy(shape, {
+    get(target, key, receiver) {
+      return Reflect.get(target, key, receiver)
+    },
+    set(target, key, value, receive) {
+      if (target.getRepaintKeys().includes(key as string)) {
+        eventEmitter.emit('repaint')
+      }
+      return Reflect.set(target, key, value, receive)
+    },
+  })
+  return proxy
+}
+
+export type ShapeProxy<S = Shape> = { [k in keyof S]: S[k] }
 export { Shape } from './shape'
 export type { ShapeConfig, Point } from './shape'
 export { Rectangle } from './rectangle'

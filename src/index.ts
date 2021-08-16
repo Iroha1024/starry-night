@@ -1,4 +1,4 @@
-import type { Shape } from './shape'
+import type { Shape, ShapeProxy } from './shape'
 import { ShapeContainer } from './shape'
 import type { RegisterEventConfig } from './event'
 import { EventPool } from './event'
@@ -12,7 +12,7 @@ class Stage {
   width: number
   height: number
   eventEmitter = new EventEmitter()
-  shapeContainer = new ShapeContainer()
+  shapeContainer = new ShapeContainer(this.eventEmitter)
   eventPool = new EventPool()
   operationLayer = new OperationLayer(this.eventEmitter, this.shapeContainer, this.eventPool)
   painter: Painter
@@ -37,13 +37,15 @@ class Stage {
   }
 
   add(shape: Shape, registerEventConfig?: RegisterEventConfig) {
-    this.shapeContainer.add(shape)
-    this.eventPool.add(shape, registerEventConfig)
+    const proxy = this.shapeContainer.add(shape)
+    proxy && this.eventPool.add(proxy, registerEventConfig)
+    return proxy
   }
 
-  remove(shape: Shape) {
+  remove(shape: ShapeProxy) {
     this.shapeContainer.remove(shape)
     this.eventPool.remove(shape)
+    this.eventEmitter.emit('repaint')
   }
 
   paint() {
