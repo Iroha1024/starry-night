@@ -7,8 +7,8 @@ interface RectangleConfig extends ShapeConfig {
 }
 
 export class Rectangle extends Shape {
-  width: number
-  height: number
+  private _width: number
+  private _height: number
 
   constructor(config: RectangleConfig) {
     const { x, y, w, h, layer, order, strokeStyle, fillStyle, lineWidth } = config
@@ -25,25 +25,22 @@ export class Rectangle extends Shape {
     this.height = h
   }
 
+  public get width(): number {
+    return this._width
+  }
+  public set width(value: number) {
+    this._width = value
+  }
+  public get height(): number {
+    return this._height
+  }
+  public set height(value: number) {
+    this._height = value
+  }
+
   override getRepaintKeys() {
     const keys: Array<keyof Rectangle> = ['width', 'height']
     return [...super.getRepaintKeys(), ...keys]
-  }
-
-  setWidth(w: number) {
-    this.width = w
-  }
-
-  getWidth() {
-    return this.width
-  }
-
-  setHeight(h: number) {
-    this.width = h
-  }
-
-  getHeight() {
-    return this.height
   }
 
   override paint(ctx: CanvasRenderingContext2D) {

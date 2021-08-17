@@ -57,7 +57,7 @@ const { eventEmitter } = stage
 
 eventEmitter.on('selectShape', (shape) => {
   if (shape) {
-    shape.setX(shape.getX() + 10)
+    shape.x += 100
   }
 })
 

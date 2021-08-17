@@ -76,16 +76,17 @@ const createShapeProxy = (shape: Shape, eventEmitter: EventEmitter): ShapeProxy 
       return Reflect.get(target, key, receiver)
     },
     set(target, key, value, receive) {
+      const flag = Reflect.set(target, key, value, receive)
       if (target.getRepaintKeys().includes(key as string)) {
         eventEmitter.emit('repaint')
       }
-      return Reflect.set(target, key, value, receive)
+      return flag
     },
   })
   return proxy
 }
 
-export type ShapeProxy<S = Shape> = { [k in keyof S]: S[k] }
+export type ShapeProxy<S extends Shape = Shape> = { [k in keyof S]: S[k] }
 export { Shape } from './shape'
 export type { ShapeConfig, Point } from './shape'
 export { Rectangle } from './rectangle'
