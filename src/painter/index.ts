@@ -6,6 +6,10 @@ export class Painter {
   private ctx: CanvasRenderingContext2D
   private eventEmitter: EventEmitter
   private shapeContainer: ShapeContainer
+  private repaintTimer: number | null = null
+  private isNeedRepaint = false
+  private CANCEL_REPAINT_TIME = 100
+  private cancelRepaintTimer: number
 
   constructor(
     eventEmitter: EventEmitter,
@@ -28,7 +32,22 @@ export class Painter {
   handle() {
     const repaint = () => {
       this.paint()
+      if (this.isNeedRepaint) {
+        this.repaintTimer = window.requestAnimationFrame(repaint)
+      } else {
+        window.cancelAnimationFrame(this.repaintTimer as number)
+        this.repaintTimer = null
+      }
     }
-    this.eventEmitter.on('repaint', repaint)
+    this.eventEmitter.on('repaint', () => {
+      this.isNeedRepaint = true
+      clearTimeout(this.cancelRepaintTimer)
+      this.cancelRepaintTimer = setTimeout(() => {
+        this.isNeedRepaint = false
+      }, this.CANCEL_REPAINT_TIME)
+      if (this.repaintTimer == null) {
+        this.repaintTimer = window.requestAnimationFrame(repaint)
+      }
+    })
   }
 }

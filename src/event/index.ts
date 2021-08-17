@@ -1,6 +1,6 @@
 import type { ShapeProxy } from '../shape'
 import { Shape } from '../shape'
-import type { EmitEventType, EmitNameType } from '../operation'
+import type { DomEvent, DomEventName } from '../operation'
 
 export class EventPool {
   private list: EventProxy[] = []
@@ -42,7 +42,7 @@ export class EventPool {
     return this.cacheList
   }
 
-  receive(event: EmitEventType) {
+  receive(event: DomEvent) {
     this.toList().forEach((eventProxy) => {
       if (event instanceof MouseEvent) {
         const { offsetX: x, offsetY: y } = event
@@ -71,11 +71,11 @@ class EventProxy {
   constructor(shapeProxy: ShapeProxy, config: RegisterEventConfig) {
     this.shapeProxy = shapeProxy
     Object.entries(config).forEach(([key, value]) => {
-      this.add(key as EmitNameType, value)
+      this.add(key as DomEventName, value)
     })
   }
 
-  add(name: EmitNameType, eventHandler: EventHandler) {
+  add(name: DomEventName, eventHandler: EventHandler) {
     if (!this.hasEvent(name)) {
       this.eventMap.set(name, [])
     }
@@ -86,7 +86,7 @@ class EventProxy {
     return this.eventMap.has(name)
   }
 
-  handle(event: EmitEventType) {
+  handle(event: DomEvent) {
     const { type } = event
     const eventQueue = this.eventMap.get(type)
     eventQueue!.forEach((handler) => handler(this.shapeProxy))
@@ -94,7 +94,7 @@ class EventProxy {
 }
 
 export type RegisterEventConfig = {
-  [N in EmitNameType]?: EventHandler
+  [N in DomEventName]?: EventHandler
 }
 
 type EventHandler = (shapeProxy: ShapeProxy) => void

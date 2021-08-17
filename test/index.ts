@@ -16,10 +16,7 @@ const a = new Rectangle({
 
 // stage.add(a)
 const proxyA = stage.add(a, {
-  click(shape) {
-    stage.remove(shape)
-    console.log(stage)
-  },
+  click(shape) {},
 })
 
 const b = new Rectangle({
@@ -55,11 +52,24 @@ stage.add(d)
 
 const { eventEmitter } = stage
 
-eventEmitter.on('selectShape', (shape) => {
-  if (shape) {
-    shape.x += 100
-  }
+eventEmitter.on('clickShape', (shape) => {
+  shape.isSelected = true
+  // console.log('clickShape', shape)
 })
+
+// eventEmitter.on('clickCanvas', () => {
+//   console.log('clickCanvas')
+// })
+
+eventEmitter.on('moveShape', (shape, event) => {
+  const { movementX, movementY } = event
+  shape.x += movementX
+  shape.y += movementY
+  // console.log('moveShape', shape, event)
+})
+// eventEmitter.on('moveCanvas', (event) => {
+//   console.log('moveCanvas', event)
+// })
 
 stage.paint()
 

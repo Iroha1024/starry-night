@@ -2,7 +2,6 @@ import type { Shape, ShapeProxy } from './shape'
 import { ShapeContainer } from './shape'
 import type { RegisterEventConfig } from './event'
 import { EventPool } from './event'
-import type { EmitNameType } from './operation'
 import { OperationLayer } from './operation'
 import { Painter } from './painter'
 import { EventEmitter } from './eventEmitter'
@@ -14,7 +13,7 @@ class Stage {
   eventEmitter = new EventEmitter()
   shapeContainer = new ShapeContainer(this.eventEmitter)
   eventPool = new EventPool()
-  operationLayer = new OperationLayer(this.eventEmitter, this.shapeContainer, this.eventPool)
+  operationLayer: OperationLayer
   painter: Painter
 
   constructor(canvas: HTMLCanvasElement) {
@@ -25,15 +24,13 @@ class Stage {
     if (!ctx) {
       throw new Error('can not getContext 2d')
     }
+    this.operationLayer = new OperationLayer(
+      this.eventEmitter,
+      this.shapeContainer,
+      this.eventPool,
+      this.canvas
+    )
     this.painter = new Painter(this.eventEmitter, ctx, this.shapeContainer)
-    this.initEvent()
-  }
-
-  initEvent() {
-    const eventNameList: Array<EmitNameType> = ['click', 'mousedown', 'mousemove', 'mouseup']
-    eventNameList.forEach((type) => {
-      this.canvas.addEventListener(type, (event) => this.operationLayer.receive(event))
-    })
   }
 
   add(shape: Shape, registerEventConfig?: RegisterEventConfig) {

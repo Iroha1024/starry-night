@@ -144,7 +144,7 @@ export class Shape {
 
   paint(ctx: CanvasRenderingContext2D) {}
 
-  protected selectShape(ctx: CanvasRenderingContext2D) {
+  protected drawShapeSelection(ctx: CanvasRenderingContext2D) {
     ctx.setLineDash([10, 5])
   }
 
@@ -159,7 +159,7 @@ export class Shape {
       ctx.fill()
     }
     if (this.isSelected) {
-      this.selectShape(ctx)
+      this.drawShapeSelection(ctx)
     }
     ctx.lineWidth = this.lineWidth
     if (this.isStroked) {
