@@ -3,7 +3,10 @@ import { createStage, Rectangle, ShapeProxy } from '../src/index'
 const stage = createStage('#canvas', {
   width: 800,
   height: 600,
+  draggable: true,
 })
+
+stage.canvas.style.background = '#ccc'
 
 const a = new Rectangle({
   x: 0,
@@ -46,31 +49,15 @@ const d = new Rectangle({
   h: 50,
   fillStyle: 'yellow',
   layer: 2,
+  draggable: true,
 })
 
 stage.add(d)
 
 const { eventEmitter } = stage
 
-eventEmitter.on('clickShape', (shape) => {
-  shape.isSelected = true
-  // console.log('clickShape', shape)
+eventEmitter.on('clickShape', () => {
+  console.log('clickShape')
 })
-
-// eventEmitter.on('clickCanvas', () => {
-//   console.log('clickCanvas')
-// })
-
-eventEmitter.on('moveShape', (shape, event) => {
-  const { movementX, movementY } = event
-  shape.x += movementX
-  shape.y += movementY
-  // console.log('moveShape', shape, event)
-})
-// eventEmitter.on('moveCanvas', (event) => {
-//   console.log('moveCanvas', event)
-// })
-
-stage.paint()
 
 console.log(stage)

@@ -11,7 +11,7 @@ export class Rectangle extends Shape {
   private _height: number
 
   constructor(config: RectangleConfig) {
-    const { x, y, w, h, layer, order, strokeStyle, fillStyle, lineWidth } = config
+    const { x, y, w, h, layer, order, strokeStyle, fillStyle, lineWidth, draggable } = config
     super({
       x,
       y,
@@ -20,6 +20,7 @@ export class Rectangle extends Shape {
       strokeStyle,
       fillStyle,
       lineWidth,
+      draggable,
     })
     this.width = w
     this.height = h

@@ -11,11 +11,17 @@ declare module 'events' {
     emit(type: 'clickCanvas'): boolean
     on(type: 'clickCanvas', listener: () => void): boolean
 
-    emit(type: 'moveShape', shape: ShapeProxy, event: MouseEvent): boolean
-    on(type: 'moveShape', listener: (shape: ShapeProxy, event: MouseEvent) => void): boolean
+    emit(type: 'moveShape', shape: ShapeProxy): boolean
+    on(type: 'moveShape', listener: (shape: ShapeProxy) => void): boolean
 
-    emit(type: 'moveCanvas', event: MouseEvent): boolean
-    on(type: 'moveCanvas', listener: (event: MouseEvent) => void): boolean
+    emit(type: 'moveCanvas'): boolean
+    on(type: 'moveCanvas', listener: () => void): boolean
+
+    emit(type: 'enterCanvas'): boolean
+    on(type: 'enterCanvas', listener: () => void): boolean
+
+    emit(type: 'leaveCanvas'): boolean
+    on(type: 'leaveCanvas', listener: () => void): boolean
 
     emit(type: 'repaint'): boolean
     on(type: 'repaint', listener: () => void): boolean

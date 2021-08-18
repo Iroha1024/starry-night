@@ -11,6 +11,7 @@ export interface ShapeConfig {
   fillStyle?: FillStyle
   strokeStyle?: StrokeStyle
   lineWidth?: number
+  draggable?: boolean
 }
 
 export class Shape {
@@ -25,9 +26,10 @@ export class Shape {
   private _strokeStyle: StrokeStyle
   private _lineWidth: number
   private _isSelected = false
+  private _draggable: boolean
 
   constructor(config: ShapeConfig) {
-    const { x, y, layer, order, fillStyle, strokeStyle, lineWidth } = config
+    const { x, y, layer, order, fillStyle, strokeStyle, lineWidth, draggable } = config
     this.x = x
     this.y = y
     this.layer = layer ?? 0
@@ -37,6 +39,7 @@ export class Shape {
     strokeStyle != undefined && (this.isStroked = true)
     this.strokeStyle = strokeStyle ?? ''
     this.lineWidth = lineWidth ?? 2
+    this.draggable = draggable ?? false
   }
 
   getShape() {
@@ -124,6 +127,14 @@ export class Shape {
 
   public set isSelected(value) {
     this._isSelected = value
+  }
+
+  public get draggable() {
+    return this._draggable
+  }
+
+  public set draggable(value) {
+    this._draggable = value
   }
 
   getRepaintKeys(): Array<string> {
