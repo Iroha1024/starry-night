@@ -6,8 +6,6 @@ const stage = createStage('#canvas', {
   draggable: true,
 })
 
-stage.canvas.style.background = '#ccc'
-
 const a = new Rectangle({
   x: 0,
   y: 0,
@@ -29,6 +27,8 @@ const b = new Rectangle({
   h: 100,
   fillStyle: 'blue',
   strokeStyle: 'black',
+  lineWidth: 10,
+  paintShapeSelectionFunction(ctx) {},
 })
 stage.add(b)
 
@@ -39,6 +39,8 @@ const c = new Rectangle({
   h: 300,
   fillStyle: 'green',
   layer: 3,
+  editable: true,
+  draggable: true,
 })
 stage.add(c)
 

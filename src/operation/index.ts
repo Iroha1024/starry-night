@@ -12,6 +12,7 @@ export class OperationLayer {
   private isMouseDown = false
   private caughtShape: ShapeProxy | null = null
   private getStageProperty: GetStageProperty
+  selectedShapeList = new ShapeSelection()
 
   constructor(
     eventEmitter: EventEmitter,
@@ -96,10 +97,13 @@ export class OperationLayer {
   }
 
   clickShape(shape: ShapeProxy) {
+    this.selectedShapeList.clear()
+    this.selectedShapeList.add(shape)
     this.eventEmitter.emit('clickShape', shape)
   }
 
   clickCanvas() {
+    this.selectedShapeList.clear()
     this.eventEmitter.emit('clickCanvas')
   }
 
@@ -176,3 +180,26 @@ export type DomEvent = MouseEvent | KeyboardEvent
 type MouseEventName = KeysMatching<HTMLElementEventMap, MouseEvent>
 
 export type DomEventName = KeysMatching<HTMLElementEventMap, DomEvent>
+
+class ShapeSelection {
+  private set = new Set<ShapeProxy>()
+
+  add(shape: ShapeProxy) {
+    this.set.add(shape)
+    shape.isSelected = true
+  }
+
+  remove(shape: ShapeProxy) {
+    shape.isSelected = false
+    return this.set.delete(shape)
+  }
+
+  clear() {
+    ;[...this.set].forEach((shape) => (shape.isSelected = false))
+    this.set.clear()
+  }
+
+  toList() {
+    return [...this.set]
+  }
+}

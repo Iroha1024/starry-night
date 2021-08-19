@@ -12,6 +12,8 @@ export interface ShapeConfig {
   strokeStyle?: StrokeStyle
   lineWidth?: number
   draggable?: boolean
+  editable?: boolean
+  paintShapeSelectionFunction?: (ctx: CanvasRenderingContext2D) => void
 }
 
 export class Shape {
@@ -28,9 +30,22 @@ export class Shape {
   private _isSelected = false
   private _draggable: boolean
   private _isCursorIn = false
+  private _editable = false
+  private _paintShapeSelectionFunction: (ctx: CanvasRenderingContext2D) => void
 
   constructor(config: ShapeConfig) {
-    const { x, y, layer, order, fillStyle, strokeStyle, lineWidth, draggable } = config
+    const {
+      x,
+      y,
+      layer,
+      order,
+      fillStyle,
+      strokeStyle,
+      lineWidth,
+      draggable,
+      editable,
+      paintShapeSelectionFunction,
+    } = config
     this.x = x
     this.y = y
     this.layer = layer ?? 0
@@ -41,6 +56,8 @@ export class Shape {
     this.strokeStyle = strokeStyle ?? ''
     this.lineWidth = lineWidth ?? 2
     this.draggable = draggable ?? false
+    this.editable = editable ?? false
+    this.paintShapeSelectionFunction = paintShapeSelectionFunction ?? (() => {})
   }
 
   getShape() {
@@ -146,6 +163,22 @@ export class Shape {
     this._isCursorIn = value
   }
 
+  public get editable() {
+    return this._editable
+  }
+
+  public set editable(value) {
+    this._editable = value
+  }
+
+  public get paintShapeSelectionFunction(): (ctx: CanvasRenderingContext2D) => void {
+    return this._paintShapeSelectionFunction
+  }
+
+  public set paintShapeSelectionFunction(value: (ctx: CanvasRenderingContext2D) => void) {
+    this._paintShapeSelectionFunction = value
+  }
+
   getRepaintKeys(): Array<string> {
     const keys: Array<keyof Shape> = [
       'x',
@@ -158,14 +191,17 @@ export class Shape {
       'strokeStyle',
       'lineWidth',
       'isSelected',
+      'draggable',
+      'editable',
+      'paintShapeSelectionFunction',
     ]
     return keys
   }
 
   paint(ctx: CanvasRenderingContext2D) {}
 
-  protected drawShapeSelection(ctx: CanvasRenderingContext2D) {
-    ctx.setLineDash([10, 5])
+  drawShapeSelection(ctx: CanvasRenderingContext2D) {
+    this.paintShapeSelectionFunction(ctx)
   }
 
   rawPaint(ctx: CanvasRenderingContext2D, process: () => void) {
@@ -178,17 +214,25 @@ export class Shape {
       ctx.fillStyle = this.fillStyle
       ctx.fill()
     }
-    if (this.isSelected) {
-      this.drawShapeSelection(ctx)
-    }
-    ctx.lineWidth = this.lineWidth
     if (this.isStroked) {
+      ctx.lineWidth = this.lineWidth * 2
       ctx.strokeStyle = this.strokeStyle
-      ctx.lineWidth *= 2
       ctx.stroke()
     }
     ctx.restore()
+    if (this.isSelected) {
+      ctx.save()
+      this.drawShapeSelection(ctx)
+      ctx.restore()
+    }
+    if (this.editable && this.isSelected) {
+      ctx.save()
+      this.paintEditStatus(ctx)
+      ctx.restore()
+    }
   }
+
+  paintEditStatus(ctx: CanvasRenderingContext2D) {}
 
   static compare(a: Shape, b: Shape) {
     return a.layer != b.layer ? a.layer - b.layer : a.order - b.order

@@ -49,6 +49,7 @@ class Stage {
   remove(shape: ShapeProxy) {
     this.shapeContainer.remove(shape)
     this.eventPool.remove(shape)
+    this.operationLayer.selectedShapeList.remove(shape)
     this.eventEmitter.emit('repaint')
   }
 

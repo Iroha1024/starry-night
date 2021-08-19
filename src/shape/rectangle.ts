@@ -11,7 +11,20 @@ export class Rectangle extends Shape {
   private _height: number
 
   constructor(config: RectangleConfig) {
-    const { x, y, w, h, layer, order, strokeStyle, fillStyle, lineWidth, draggable } = config
+    const {
+      x,
+      y,
+      w,
+      h,
+      layer,
+      order,
+      strokeStyle,
+      fillStyle,
+      lineWidth,
+      draggable,
+      editable,
+      paintShapeSelectionFunction,
+    } = config
     super({
       x,
       y,
@@ -21,6 +34,8 @@ export class Rectangle extends Shape {
       fillStyle,
       lineWidth,
       draggable,
+      editable,
+      paintShapeSelectionFunction,
     })
     this.width = w
     this.height = h
@@ -48,6 +63,46 @@ export class Rectangle extends Shape {
     this.rawPaint(ctx, () => {
       ctx.rect(this.x, this.y, this.width, this.height)
     })
+  }
+
+  override paintEditStatus(ctx: CanvasRenderingContext2D) {
+    const EDIT_POINT_WIDTH = 12
+    const HALF = EDIT_POINT_WIDTH / 2
+    const LINE_WIDTH = 2
+    const COLOR = '#B2CCFF'
+    ctx.fillStyle = COLOR
+    ctx.fillRect(this.x - HALF, this.y - HALF, EDIT_POINT_WIDTH, EDIT_POINT_WIDTH)
+    ctx.fillRect(this.x - HALF + this.width / 2, this.y - HALF, EDIT_POINT_WIDTH, EDIT_POINT_WIDTH)
+    ctx.fillRect(this.x - HALF + this.width, this.y - HALF, EDIT_POINT_WIDTH, EDIT_POINT_WIDTH)
+    ctx.fillRect(
+      this.x - HALF + this.width,
+      this.y - HALF + this.height / 2,
+      EDIT_POINT_WIDTH,
+      EDIT_POINT_WIDTH
+    )
+    ctx.fillRect(
+      this.x - HALF + this.width,
+      this.y - HALF + this.height,
+      EDIT_POINT_WIDTH,
+      EDIT_POINT_WIDTH
+    )
+    ctx.fillRect(this.x - HALF, this.y - HALF + this.height, EDIT_POINT_WIDTH, EDIT_POINT_WIDTH)
+    ctx.fillRect(
+      this.x - HALF + this.width / 2,
+      this.y - HALF + this.height,
+      EDIT_POINT_WIDTH,
+      EDIT_POINT_WIDTH
+    )
+    ctx.fillRect(this.x - HALF, this.y - HALF + this.height / 2, EDIT_POINT_WIDTH, EDIT_POINT_WIDTH)
+    ctx.beginPath()
+    ctx.moveTo(this.x, this.y)
+    ctx.lineTo(this.x + this.width, this.y)
+    ctx.lineTo(this.x + this.width, this.y + this.height)
+    ctx.lineTo(this.x, this.y + this.height)
+    ctx.closePath()
+    ctx.strokeStyle = COLOR
+    ctx.lineWidth = LINE_WIDTH
+    ctx.stroke()
   }
 
   override isInside(point: Point) {
