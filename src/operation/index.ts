@@ -1,10 +1,9 @@
 import type { ShapeContainer, ShapeProxy } from '../shape'
 import type { EventPool } from '../event'
 import type { EventEmitter } from '../eventEmitter'
-import type { Stage } from '../stage'
+import type { GetStageProperty } from '../stage'
 
 export class OperationLayer {
-  private stage: Stage
   private shapeContainer: ShapeContainer
   private eventPool: EventPool
   private eventEmitter: EventEmitter
@@ -12,15 +11,27 @@ export class OperationLayer {
   private ctx: CanvasRenderingContext2D
   private isMouseDown = false
   private caughtShape: ShapeProxy | null = null
+  private getStageProperty: GetStageProperty
 
-  constructor(stage: Stage, ctx: CanvasRenderingContext2D) {
-    this.stage = stage
-    this.eventEmitter = stage.eventEmitter
-    this.shapeContainer = stage.shapeContainer
-    this.eventPool = stage.eventPool
+  constructor(
+    eventEmitter: EventEmitter,
+    shapeContainer: ShapeContainer,
+    eventPool: EventPool,
+    getStageProperty: GetStageProperty,
+    ctx: CanvasRenderingContext2D
+  ) {
+    this.eventEmitter = eventEmitter
+    this.shapeContainer = shapeContainer
+    this.eventPool = eventPool
+    this.getStageProperty = getStageProperty
     this.ctx = ctx
     this.canvas = ctx.canvas
     this.initEvent()
+  }
+
+  initState() {
+    this.isMouseDown = false
+    this.caughtShape = null
   }
 
   initEvent() {
@@ -55,15 +66,16 @@ export class OperationLayer {
           break
         case 'mousemove':
           this.isMouseDown && this.mousemove(event)
+          this.enterLeaveShape(event)
           break
         case 'mouseup':
-          this.isMouseDown = false
-          this.caughtShape = null
+          this.initState()
           break
         case 'mouseenter':
           this.enterCanvas()
           break
         case 'mouseleave':
+          this.initState()
           this.leaveCanvas()
           break
       }
@@ -116,13 +128,12 @@ export class OperationLayer {
   }
 
   moveCanvas(event: MouseEvent) {
-    if (this.stage.draggable) {
+    if (this.getStageProperty().draggable) {
       const { movementX, movementY } = event
       this.shapeContainer.toList().forEach((shape) => {
         shape.x += movementX
         shape.y += movementY
       })
-      this.eventEmitter.emit('repaint')
       this.eventEmitter.emit('moveCanvas')
     }
   }
@@ -132,8 +143,25 @@ export class OperationLayer {
   }
 
   leaveCanvas() {
-    this.isMouseDown = false
     this.eventEmitter.emit('leaveCanvas')
+  }
+
+  enterLeaveShape(event: MouseEvent) {
+    const { offsetX: x, offsetY: y } = event
+    const topLayerShape = this.shapeContainer.getTopLayerShape({
+      x,
+      y,
+    })
+    for (const shape of this.shapeContainer.toReverseList()) {
+      if (shape == topLayerShape && !shape.isCursorIn) {
+        shape.isCursorIn = true
+        this.eventEmitter.emit('enterShape', shape)
+      }
+      if (shape != topLayerShape && shape.isCursorIn) {
+        shape.isCursorIn = false
+        this.eventEmitter.emit('leaveShape', shape)
+      }
+    }
   }
 
   transfer(event: DomEvent) {

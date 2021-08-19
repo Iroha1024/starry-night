@@ -6,7 +6,7 @@ import { OperationLayer } from './operation'
 import { Painter } from './painter'
 import { EventEmitter } from './eventEmitter'
 
-export class Stage {
+class Stage {
   canvas: HTMLCanvasElement
   width: number
   height: number
@@ -29,7 +29,13 @@ export class Stage {
     if (!ctx) {
       throw new Error('can not getContext 2d')
     }
-    this.operationLayer = new OperationLayer(this, ctx)
+    this.operationLayer = new OperationLayer(
+      this.eventEmitter,
+      this.shapeContainer,
+      this.eventPool,
+      this.getProperty.bind(this),
+      ctx
+    )
     this.painter = new Painter(this.eventEmitter, ctx, this.shapeContainer)
   }
 
@@ -45,7 +51,17 @@ export class Stage {
     this.eventPool.remove(shape)
     this.eventEmitter.emit('repaint')
   }
+
+  getProperty() {
+    return {
+      width: this.width,
+      height: this.height,
+      draggable: this.draggable,
+    }
+  }
 }
+
+export type GetStageProperty = () => Readonly<StageProperty>
 
 interface StageProperty {
   width: number

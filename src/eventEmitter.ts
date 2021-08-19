@@ -23,6 +23,12 @@ declare module 'events' {
     emit(type: 'leaveCanvas'): boolean
     on(type: 'leaveCanvas', listener: () => void): boolean
 
+    emit(type: 'enterShape', shape: ShapeProxy): boolean
+    on(type: 'enterShape', listener: (shape: ShapeProxy) => void): boolean
+
+    emit(type: 'leaveShape', shape: ShapeProxy): boolean
+    on(type: 'leaveShape', listener: (shape: ShapeProxy) => void): boolean
+
     emit(type: 'repaint'): boolean
     on(type: 'repaint', listener: () => void): boolean
   }

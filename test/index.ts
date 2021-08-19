@@ -56,8 +56,12 @@ stage.add(d)
 
 const { eventEmitter } = stage
 
-eventEmitter.on('clickShape', () => {
-  console.log('clickShape')
+eventEmitter.on('enterShape', (shape) => {
+  // console.log('enterShape', shape.fillStyle)
+})
+
+eventEmitter.on('leaveShape', (shape) => {
+  // console.log('leaveShape', shape.fillStyle)
 })
 
 console.log(stage)

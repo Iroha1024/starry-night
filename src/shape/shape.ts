@@ -27,6 +27,7 @@ export class Shape {
   private _lineWidth: number
   private _isSelected = false
   private _draggable: boolean
+  private _isCursorIn = false
 
   constructor(config: ShapeConfig) {
     const { x, y, layer, order, fillStyle, strokeStyle, lineWidth, draggable } = config
@@ -135,6 +136,14 @@ export class Shape {
 
   public set draggable(value) {
     this._draggable = value
+  }
+
+  public get isCursorIn() {
+    return this._isCursorIn
+  }
+
+  public set isCursorIn(value) {
+    this._isCursorIn = value
   }
 
   getRepaintKeys(): Array<string> {

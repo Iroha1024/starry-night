@@ -58,6 +58,13 @@ export class ShapeContainer {
     return this.cacheList
   }
 
+  /**
+   * sort: layer Dsce
+   */
+  toReverseList() {
+    return [...this.toList()].reverse()
+  }
+
   getTopLayerShape(point: Point) {
     const list = this.toList()
     for (let i = list.length - 1; i >= 0; i--) {
