@@ -253,6 +253,11 @@ export class Shape {
   isInside(point: Point) {
     return false
   }
+
+  move(movementX: number, movementY: number) {
+    this.x += movementX
+    this.y += movementY
+  }
 }
 
 export interface Point {

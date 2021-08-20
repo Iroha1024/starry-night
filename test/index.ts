@@ -1,4 +1,4 @@
-import { createStage, Rectangle, ShapeProxy } from '../src/index'
+import { createStage, Rectangle, Group } from '../src/index'
 
 const stage = createStage('#canvas', {
   width: 800,
@@ -15,11 +15,6 @@ const a = new Rectangle({
   layer: 2,
 })
 
-// stage.add(a)
-const proxyA = stage.add(a, {
-  click(shape) {},
-})
-
 const b = new Rectangle({
   x: 50,
   y: 50,
@@ -30,8 +25,16 @@ const b = new Rectangle({
   lineWidth: 10,
   paintShapeSelectionFunction(ctx) {},
   editable: true,
+  draggable: true,
 })
-stage.add(b)
+
+const group = new Group({
+  children: [a, b],
+  editable: true,
+  draggable: true,
+})
+
+stage.add(group)
 
 const c = new Rectangle({
   x: 100,

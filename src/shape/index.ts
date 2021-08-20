@@ -200,3 +200,4 @@ export type ShapeProxy<S extends Shape = Shape> = { [k in keyof S]: S[k] }
 export { Shape } from './shape'
 export type { ShapeConfig, Point } from './shape'
 export { Rectangle } from './rectangle'
+export { Group } from './group'

@@ -124,8 +124,7 @@ export class OperationLayer {
   moveShape(shape: ShapeProxy, event: MouseEvent) {
     if (shape.draggable) {
       const { movementX, movementY } = event
-      shape.x += movementX
-      shape.y += movementY
+      shape.move(movementX, movementY)
       this.eventEmitter.emit('moveShape', shape)
     }
   }
@@ -133,10 +132,7 @@ export class OperationLayer {
   moveCanvas(event: MouseEvent) {
     if (this.getStageProperty().draggable) {
       const { movementX, movementY } = event
-      this.shapeContainer.toList().forEach((shape) => {
-        shape.x += movementX
-        shape.y += movementY
-      })
+      this.shapeContainer.toList().forEach((shape) => shape.move(movementX, movementY))
       this.eventEmitter.emit('moveCanvas')
     }
   }
