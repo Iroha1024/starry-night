@@ -70,4 +70,8 @@ eventEmitter.on('leaveShape', (shape) => {
   // console.log('leaveShape', shape.fillStyle)
 })
 
+eventEmitter.on('clickShape', (shape) => {
+  console.log(stage.operationLayer.getSelectedShape().layer)
+})
+
 console.log(stage)

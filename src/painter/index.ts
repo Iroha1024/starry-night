@@ -1,26 +1,31 @@
 import type { EventEmitter } from '../eventEmitter'
-import type { ShapeContainer } from '../shape'
+import type { ShapeContainer, ShapeProxy, Group } from '../shape'
+import type { OperationLayer } from '../operation'
 
 export class Painter {
   private canvas: HTMLCanvasElement
   private ctx: CanvasRenderingContext2D
   private eventEmitter: EventEmitter
   private shapeContainer: ShapeContainer
+  private operationLayer: OperationLayer
   private repaintTimer: number | null = null
   private isNeedRepaint = false
   private CANCEL_REPAINT_TIME = 100
   private cancelRepaintTimer: number
+  private eidtShapeProxy: EditShapeProxy
 
   constructor(
     eventEmitter: EventEmitter,
-    ctx: CanvasRenderingContext2D,
-    shapeContainer: ShapeContainer
+    shapeContainer: ShapeContainer,
+    operationLayer: OperationLayer,
+    ctx: CanvasRenderingContext2D
   ) {
     this.eventEmitter = eventEmitter
+    this.shapeContainer = shapeContainer
+    this.operationLayer = operationLayer
     this.ctx = ctx
     this.canvas = ctx.canvas
-    this.shapeContainer = shapeContainer
-
+    this.eidtShapeProxy = new EditShapeProxy(this.operationLayer.getSelectedShape())
     this.handle()
   }
 
@@ -28,10 +33,7 @@ export class Painter {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     this.shapeContainer.toList().forEach((shape) => {
       shape.paint(this.ctx)
-      const editShapeProxy = this.shapeContainer.selectedShapeList.get(shape)
-      if (editShapeProxy) {
-        editShapeProxy.paintEditStatus(this.ctx)
-      }
+      this.eidtShapeProxy.paintEditStatus(this.ctx)
     })
   }
 
@@ -55,5 +57,77 @@ export class Painter {
         this.repaintTimer = window.requestAnimationFrame(repaint)
       }
     })
+  }
+}
+
+class EditShapeProxy {
+  shape: ShapeProxy<Group>
+
+  constructor(shape: ShapeProxy<Group>) {
+    this.shape = shape
+  }
+
+  paintEditStatus(ctx: CanvasRenderingContext2D) {
+    this.shape.calculateBoundingBox()
+    if (this.shape.width == 0 || this.shape.height == 0) return
+    const EDIT_POINT_WIDTH = 12
+    const HALF = EDIT_POINT_WIDTH / 2
+    const LINE_WIDTH = 2
+    const COLOR = '#B2CCFF'
+    ctx.save()
+    ctx.fillStyle = COLOR
+    ctx.fillRect(this.shape.x - HALF, this.shape.y - HALF, EDIT_POINT_WIDTH, EDIT_POINT_WIDTH)
+    ctx.fillRect(
+      this.shape.x - HALF + this.shape.width / 2,
+      this.shape.y - HALF,
+      EDIT_POINT_WIDTH,
+      EDIT_POINT_WIDTH
+    )
+    ctx.fillRect(
+      this.shape.x - HALF + this.shape.width,
+      this.shape.y - HALF,
+      EDIT_POINT_WIDTH,
+      EDIT_POINT_WIDTH
+    )
+    ctx.fillRect(
+      this.shape.x - HALF + this.shape.width,
+      this.shape.y - HALF + this.shape.height / 2,
+      EDIT_POINT_WIDTH,
+      EDIT_POINT_WIDTH
+    )
+    ctx.fillRect(
+      this.shape.x - HALF + this.shape.width,
+      this.shape.y - HALF + this.shape.height,
+      EDIT_POINT_WIDTH,
+      EDIT_POINT_WIDTH
+    )
+    ctx.fillRect(
+      this.shape.x - HALF,
+      this.shape.y - HALF + this.shape.height,
+      EDIT_POINT_WIDTH,
+      EDIT_POINT_WIDTH
+    )
+    ctx.fillRect(
+      this.shape.x - HALF + this.shape.width / 2,
+      this.shape.y - HALF + this.shape.height,
+      EDIT_POINT_WIDTH,
+      EDIT_POINT_WIDTH
+    )
+    ctx.fillRect(
+      this.shape.x - HALF,
+      this.shape.y - HALF + this.shape.height / 2,
+      EDIT_POINT_WIDTH,
+      EDIT_POINT_WIDTH
+    )
+    ctx.beginPath()
+    ctx.moveTo(this.shape.x, this.shape.y)
+    ctx.lineTo(this.shape.x + this.shape.width, this.shape.y)
+    ctx.lineTo(this.shape.x + this.shape.width, this.shape.y + this.shape.height)
+    ctx.lineTo(this.shape.x, this.shape.y + this.shape.height)
+    ctx.closePath()
+    ctx.strokeStyle = COLOR
+    ctx.lineWidth = LINE_WIDTH
+    ctx.stroke()
+    ctx.restore()
   }
 }

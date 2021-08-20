@@ -36,7 +36,7 @@ class Stage {
       this.getProperty.bind(this),
       ctx
     )
-    this.painter = new Painter(this.eventEmitter, ctx, this.shapeContainer)
+    this.painter = new Painter(this.eventEmitter, this.shapeContainer, this.operationLayer, ctx)
   }
 
   add(shape: Shape, registerEventConfig?: RegisterEventConfig) {
@@ -48,7 +48,7 @@ class Stage {
 
   remove(shape: ShapeProxy) {
     this.shapeContainer.remove(shape)
-    this.shapeContainer.selectedShapeList.remove(shape)
+    this.operationLayer.removeSelectShapeChild(shape)
     this.eventPool.remove(shape)
     this.eventEmitter.emit('repaint')
   }

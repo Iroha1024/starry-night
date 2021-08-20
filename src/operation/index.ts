@@ -1,4 +1,5 @@
 import type { ShapeContainer, ShapeProxy } from '../shape'
+import { Group } from '../shape'
 import type { EventPool } from '../event'
 import type { EventEmitter } from '../eventEmitter'
 import type { GetStageProperty } from '../stage'
@@ -8,10 +9,10 @@ export class OperationLayer {
   private eventPool: EventPool
   private eventEmitter: EventEmitter
   private canvas: HTMLCanvasElement
-  private ctx: CanvasRenderingContext2D
   private isMouseDown = false
   private caughtShape: ShapeProxy | null = null
   private getStageProperty: GetStageProperty
+  private selectedShape: ShapeProxy<Group>
 
   constructor(
     eventEmitter: EventEmitter,
@@ -24,17 +25,26 @@ export class OperationLayer {
     this.shapeContainer = shapeContainer
     this.eventPool = eventPool
     this.getStageProperty = getStageProperty
-    this.ctx = ctx
     this.canvas = ctx.canvas
+    this.initSelectedShape()
     this.initEvent()
   }
 
-  initState() {
+  private initState() {
     this.isMouseDown = false
     this.caughtShape = null
   }
 
-  initEvent() {
+  private initSelectedShape() {
+    this.selectedShape = this.shapeContainer.add(
+      new Group({
+        children: [],
+        editable: true,
+      })
+    ) as ShapeProxy<Group>
+  }
+
+  private initEvent() {
     const eventNameList: Array<DomEventName> = [
       'click',
       'mousedown',
@@ -96,13 +106,13 @@ export class OperationLayer {
   }
 
   clickShape(shape: ShapeProxy) {
-    this.shapeContainer.selectedShapeList.clear()
-    this.shapeContainer.selectedShapeList.add(shape)
+    this.selectedShape.clearChild()
+    this.selectedShape.addChild(shape.getShape())
     this.eventEmitter.emit('clickShape', shape)
   }
 
   clickCanvas() {
-    this.shapeContainer.selectedShapeList.clear()
+    this.selectedShape.clearChild()
     this.eventEmitter.emit('clickCanvas')
   }
 
@@ -167,6 +177,14 @@ export class OperationLayer {
 
   transfer(event: DomEvent) {
     this.eventPool.receive(event)
+  }
+
+  removeSelectShapeChild(shape: ShapeProxy) {
+    this.selectedShape.removeChild(shape.getShape())
+  }
+
+  getSelectedShape() {
+    return this.selectedShape
   }
 }
 
