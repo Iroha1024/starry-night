@@ -1,11 +1,11 @@
-import { nanoid } from 'nanoid'
-
 type FillStyle = CanvasFillStrokeStyles['fillStyle']
 type StrokeStyle = CanvasFillStrokeStyles['strokeStyle']
 
 export interface ShapeConfig {
   x: number
   y: number
+  w: number
+  h: number
   layer?: number
   order?: number
   fillStyle?: FillStyle
@@ -17,9 +17,10 @@ export interface ShapeConfig {
 }
 
 export class Shape {
-  private readonly _id = nanoid()
   private _x: number
   private _y: number
+  private _width: number
+  private _height: number
   private _layer: number
   private _order: number
   private _isFilled = false
@@ -37,6 +38,8 @@ export class Shape {
     const {
       x,
       y,
+      w,
+      h,
       layer,
       order,
       fillStyle,
@@ -48,6 +51,8 @@ export class Shape {
     } = config
     this.x = x
     this.y = y
+    this.width = w
+    this.height = h
     this.layer = layer ?? 0
     this.order = order ?? 0
     fillStyle != undefined && (this.isFilled = true)
@@ -64,10 +69,6 @@ export class Shape {
     return this
   }
 
-  public get id() {
-    return this._id
-  }
-
   public get x(): number {
     return this._x
   }
@@ -82,6 +83,22 @@ export class Shape {
 
   public set y(value: number) {
     this._y = value
+  }
+
+  public get width(): number {
+    return this._width
+  }
+
+  public set width(value: number) {
+    this._width = value
+  }
+
+  public get height(): number {
+    return this._height
+  }
+
+  public set height(value: number) {
+    this._height = value
   }
 
   public get layer(): number {
@@ -183,6 +200,8 @@ export class Shape {
     const keys: Array<keyof Shape> = [
       'x',
       'y',
+      'width',
+      'height',
       'layer',
       'order',
       'isFilled',
@@ -200,7 +219,7 @@ export class Shape {
 
   paint(ctx: CanvasRenderingContext2D) {}
 
-  drawShapeSelection(ctx: CanvasRenderingContext2D) {
+  paintShapeSelection(ctx: CanvasRenderingContext2D) {
     this.paintShapeSelectionFunction(ctx)
   }
 
@@ -222,17 +241,10 @@ export class Shape {
     ctx.restore()
     if (this.isSelected) {
       ctx.save()
-      this.drawShapeSelection(ctx)
-      ctx.restore()
-    }
-    if (this.editable && this.isSelected) {
-      ctx.save()
-      this.paintEditStatus(ctx)
+      this.paintShapeSelection(ctx)
       ctx.restore()
     }
   }
-
-  paintEditStatus(ctx: CanvasRenderingContext2D) {}
 
   static compare(a: Shape, b: Shape) {
     return a.layer != b.layer ? a.layer - b.layer : a.order - b.order

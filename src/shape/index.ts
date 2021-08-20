@@ -7,6 +7,7 @@ export class ShapeContainer {
   private cacheFlag = false
   private cacheList: ShapeProxy[] = []
   private eventEmitter: EventEmitter
+  selectedShapeList = new ShapeSelection()
 
   constructor(eventEmitter: EventEmitter) {
     this.eventEmitter = eventEmitter
@@ -91,6 +92,108 @@ const createShapeProxy = (shape: Shape, eventEmitter: EventEmitter): ShapeProxy 
     },
   })
   return proxy
+}
+
+class ShapeSelection {
+  private set = new Set<ShapeProxy>()
+  private map = new Map<ShapeProxy, EditShapeProxy>()
+
+  add(shape: ShapeProxy) {
+    if (!shape.editable) return
+    shape.isSelected = true
+    this.set.add(shape)
+    this.map.set(shape, new EditShapeProxy(shape))
+  }
+
+  remove(shape: ShapeProxy) {
+    shape.isSelected = false
+    this.map.delete(shape)
+    this.set.delete(shape)
+  }
+
+  clear() {
+    ;[...this.set].forEach((shape) => (shape.isSelected = false))
+    this.set.clear()
+    this.map.clear()
+  }
+
+  get(shape: ShapeProxy) {
+    return this.map.get(shape)
+  }
+
+  toList() {
+    return [...this.set]
+  }
+}
+
+class EditShapeProxy {
+  shape: ShapeProxy
+
+  constructor(shape: ShapeProxy) {
+    this.shape = shape
+  }
+
+  paintEditStatus(ctx: CanvasRenderingContext2D) {
+    const EDIT_POINT_WIDTH = 12
+    const HALF = EDIT_POINT_WIDTH / 2
+    const LINE_WIDTH = 2
+    const COLOR = '#B2CCFF'
+    ctx.save()
+    ctx.fillStyle = COLOR
+    ctx.fillRect(this.shape.x - HALF, this.shape.y - HALF, EDIT_POINT_WIDTH, EDIT_POINT_WIDTH)
+    ctx.fillRect(
+      this.shape.x - HALF + this.shape.width / 2,
+      this.shape.y - HALF,
+      EDIT_POINT_WIDTH,
+      EDIT_POINT_WIDTH
+    )
+    ctx.fillRect(
+      this.shape.x - HALF + this.shape.width,
+      this.shape.y - HALF,
+      EDIT_POINT_WIDTH,
+      EDIT_POINT_WIDTH
+    )
+    ctx.fillRect(
+      this.shape.x - HALF + this.shape.width,
+      this.shape.y - HALF + this.shape.height / 2,
+      EDIT_POINT_WIDTH,
+      EDIT_POINT_WIDTH
+    )
+    ctx.fillRect(
+      this.shape.x - HALF + this.shape.width,
+      this.shape.y - HALF + this.shape.height,
+      EDIT_POINT_WIDTH,
+      EDIT_POINT_WIDTH
+    )
+    ctx.fillRect(
+      this.shape.x - HALF,
+      this.shape.y - HALF + this.shape.height,
+      EDIT_POINT_WIDTH,
+      EDIT_POINT_WIDTH
+    )
+    ctx.fillRect(
+      this.shape.x - HALF + this.shape.width / 2,
+      this.shape.y - HALF + this.shape.height,
+      EDIT_POINT_WIDTH,
+      EDIT_POINT_WIDTH
+    )
+    ctx.fillRect(
+      this.shape.x - HALF,
+      this.shape.y - HALF + this.shape.height / 2,
+      EDIT_POINT_WIDTH,
+      EDIT_POINT_WIDTH
+    )
+    ctx.beginPath()
+    ctx.moveTo(this.shape.x, this.shape.y)
+    ctx.lineTo(this.shape.x + this.shape.width, this.shape.y)
+    ctx.lineTo(this.shape.x + this.shape.width, this.shape.y + this.shape.height)
+    ctx.lineTo(this.shape.x, this.shape.y + this.shape.height)
+    ctx.closePath()
+    ctx.strokeStyle = COLOR
+    ctx.lineWidth = LINE_WIDTH
+    ctx.stroke()
+    ctx.restore()
+  }
 }
 
 export type ShapeProxy<S extends Shape = Shape> = { [k in keyof S]: S[k] }

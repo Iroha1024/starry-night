@@ -26,7 +26,13 @@ export class Painter {
 
   paint() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-    this.shapeContainer.toList().forEach((shape) => shape.paint(this.ctx))
+    this.shapeContainer.toList().forEach((shape) => {
+      shape.paint(this.ctx)
+      const editShapeProxy = this.shapeContainer.selectedShapeList.get(shape)
+      if (editShapeProxy) {
+        editShapeProxy.paintEditStatus(this.ctx)
+      }
+    })
   }
 
   handle() {

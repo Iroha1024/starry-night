@@ -29,6 +29,7 @@ const b = new Rectangle({
   strokeStyle: 'black',
   lineWidth: 10,
   paintShapeSelectionFunction(ctx) {},
+  editable: true,
 })
 stage.add(b)
 
