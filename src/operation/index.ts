@@ -60,7 +60,6 @@ export class OperationLayer {
 
   receive(event: DomEvent) {
     this.handle(event)
-    this.transfer(event)
   }
 
   handle(event: DomEvent) {
@@ -107,8 +106,9 @@ export class OperationLayer {
 
   clickShape(shape: ShapeProxy) {
     this.selectedShape.clearChild()
-    this.selectedShape.addChild(shape.getShape())
+    this.selectedShape.addChild(shape.origin)
     this.eventEmitter.emit('clickShape', shape)
+    this.transfer('clickShape', shape)
   }
 
   clickCanvas() {
@@ -136,6 +136,7 @@ export class OperationLayer {
       const { movementX, movementY } = event
       shape.move(movementX, movementY)
       this.eventEmitter.emit('moveShape', shape)
+      this.transfer('moveShape', shape)
     }
   }
 
@@ -165,22 +166,24 @@ export class OperationLayer {
       if (shape == topLayerShape && !shape.isCursorIn) {
         shape.isCursorIn = true
         this.eventEmitter.emit('enterShape', shape)
+        this.transfer('enterShape', shape)
       }
       if (shape != topLayerShape && shape.isCursorIn) {
         shape.isCursorIn = false
         this.eventEmitter.emit('leaveShape', shape)
+        this.transfer('leaveShape', shape)
       }
     }
   }
 
   touchEditPoint(event: MouseEvent) {}
 
-  transfer(event: DomEvent) {
-    this.eventPool.receive(event)
+  transfer(event: EmitEventName, shape: ShapeProxy) {
+    this.eventPool.receive(event, shape)
   }
 
   removeSelectShapeChild(shape: ShapeProxy) {
-    this.selectedShape.removeChild(shape.getShape())
+    this.selectedShape.removeChild(shape.origin)
   }
 
   getSelectedShape() {
@@ -190,8 +193,10 @@ export class OperationLayer {
 
 type KeysMatching<T, V> = { [K in keyof T]: T[K] extends V ? K : never }[keyof T]
 
-export type DomEvent = MouseEvent | KeyboardEvent
+type DomEvent = MouseEvent | KeyboardEvent
 
 type MouseEventName = KeysMatching<HTMLElementEventMap, MouseEvent>
 
-export type DomEventName = KeysMatching<HTMLElementEventMap, DomEvent>
+type DomEventName = KeysMatching<HTMLElementEventMap, DomEvent>
+
+export type EmitEventName = 'clickShape' | 'moveShape' | 'enterShape' | 'leaveShape'

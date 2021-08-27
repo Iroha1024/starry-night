@@ -46,7 +46,9 @@ const c = new Rectangle({
   editable: true,
   draggable: true,
 })
-stage.add(c)
+stage.add(c, {
+  clickShape() {},
+})
 
 const d = new Rectangle({
   x: 120,
@@ -71,7 +73,7 @@ eventEmitter.on('leaveShape', (shape) => {
 })
 
 eventEmitter.on('clickShape', (shape) => {
-  console.log(stage.operationLayer.getSelectedShape().layer)
+  // console.log(stage.operationLayer.getSelectedShape().layer)
 })
 
 console.log(stage)

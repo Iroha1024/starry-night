@@ -1,16 +1,19 @@
 import type { ShapeProxy } from '../shape'
 import { Shape } from '../shape'
-import type { DomEvent, DomEventName } from '../operation'
+import type { EmitEventName } from '../operation'
 
 export class EventPool {
   private list: EventProxy[] = []
   private cacheFlag = false
   private cacheList: EventProxy[] = []
+  private map = new Map<ShapeProxy, EventProxy>()
 
   add(shapeProxy: ShapeProxy, eventProxyConfig?: RegisterEventConfig) {
     if (!eventProxyConfig || Object.keys(eventProxyConfig).length == 0) return
     if (this.has(shapeProxy)) return
-    this.list.push(new EventProxy(shapeProxy, eventProxyConfig))
+    const eventProxy = new EventProxy(shapeProxy, eventProxyConfig)
+    this.map.set(shapeProxy, eventProxy)
+    this.list.push(eventProxy)
     this.cacheFlag = true
   }
 
@@ -18,6 +21,7 @@ export class EventPool {
     if (!this.has(shapeProxy)) return false
     const index = this.findIndex(shapeProxy)
     this.list.splice(index, 1)
+    this.map.delete(shapeProxy)
     this.cacheFlag = true
     return true
   }
@@ -36,65 +40,48 @@ export class EventPool {
   toList() {
     if (!this.cacheFlag) return this.cacheList
     this.cacheList = [...this.list]
-      .sort((a, b) => Shape.compare(a.shapeProxy.getShape(), b.shapeProxy.getShape()))
+      .sort((a, b) => Shape.compare(a.shapeProxy.origin, b.shapeProxy.origin))
       .reverse()
     this.cacheFlag = false
     return this.cacheList
   }
 
-  receive(event: DomEvent) {
-    this.toList().forEach((eventProxy) => {
-      if (event instanceof MouseEvent) {
-        const { offsetX: x, offsetY: y } = event
-        if (
-          eventProxy.hasEvent(event.type) &&
-          eventProxy.shapeProxy.isInside({
-            x,
-            y,
-          })
-        ) {
-          eventProxy.handle(event)
-        }
-      } else if (event instanceof KeyboardEvent) {
-        if (eventProxy.hasEvent(event.type)) {
-          eventProxy.handle(event)
-        }
-      }
-    })
+  receive(event: EmitEventName, shape: ShapeProxy) {
+    const eventProxy = this.map.get(shape)
+    eventProxy?.handle(event)
   }
 }
 
 class EventProxy {
   shapeProxy: ShapeProxy
-  eventMap = new Map<string, Array<EventHandler>>()
+  eventMap = new Map<EmitEventName, Array<EventHandler>>()
 
   constructor(shapeProxy: ShapeProxy, config: RegisterEventConfig) {
     this.shapeProxy = shapeProxy
     Object.entries(config).forEach(([key, value]) => {
-      this.add(key as DomEventName, value)
+      this.add(key as EmitEventName, value)
     })
   }
 
-  add(name: DomEventName, eventHandler: EventHandler) {
+  add(name: EmitEventName, eventHandler: EventHandler) {
     if (!this.hasEvent(name)) {
       this.eventMap.set(name, [])
     }
     this.eventMap.get(name)!.push(eventHandler)
   }
 
-  hasEvent(name: string) {
+  hasEvent(name: EmitEventName) {
     return this.eventMap.has(name)
   }
 
-  handle(event: DomEvent) {
-    const { type } = event
-    const eventQueue = this.eventMap.get(type)
-    eventQueue!.forEach((handler) => handler(this.shapeProxy))
+  handle(name: EmitEventName) {
+    const eventQueue = this.eventMap.get(name)
+    eventQueue?.forEach((handler) => handler.call(this.shapeProxy))
   }
 }
 
 export type RegisterEventConfig = {
-  [N in DomEventName]?: EventHandler
+  [N in EmitEventName]?: EventHandler
 }
 
-type EventHandler = (shapeProxy: ShapeProxy) => void
+type EventHandler = (this: ShapeProxy) => void

@@ -51,7 +51,7 @@ export class ShapeContainer {
     layerList.sort((a, b) => a - b)
     layerList.forEach((layer) => {
       const shapeList = this.layerMap.get(layer)!
-      ;[...shapeList].sort((a, b) => Shape.compare(a.getShape(), b.getShape()))
+      ;[...shapeList].sort((a, b) => Shape.compare(a.origin, b.origin))
       this.cacheList.push(...shapeList)
     })
     this.cacheFlag = false
@@ -80,6 +80,7 @@ export class ShapeContainer {
 const createShapeProxy = (shape: Shape, eventEmitter: EventEmitter): ShapeProxy => {
   const proxy = new Proxy(shape, {
     get(target, key, receiver) {
+      if (key == 'origin') return target
       return Reflect.get(target, key, receiver)
     },
     set(target, key, value, receive) {

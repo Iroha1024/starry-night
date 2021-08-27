@@ -17,6 +17,7 @@ export interface ShapeConfig {
 }
 
 export class Shape {
+  readonly origin: Shape
   private _x: number
   private _y: number
   private _width: number
@@ -63,10 +64,6 @@ export class Shape {
     this.draggable = draggable ?? false
     this.editable = editable ?? false
     this.paintShapeSelectionFunction = paintShapeSelectionFunction ?? (() => {})
-  }
-
-  getShape() {
-    return this
   }
 
   public get x(): number {
