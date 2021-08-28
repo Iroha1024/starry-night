@@ -4,7 +4,7 @@ import type { RegisterEventConfig } from './event'
 import { EventPool } from './event'
 import { OperationLayer } from './operation'
 import { Painter } from './painter'
-import { EventEmitter } from './eventEmitter'
+import { Messenger } from './messenger'
 
 class Stage {
   canvas: HTMLCanvasElement
@@ -12,8 +12,8 @@ class Stage {
   height: number
   draggable: boolean
 
-  eventEmitter = new EventEmitter()
-  shapeContainer = new ShapeContainer(this.eventEmitter)
+  messenger = new Messenger()
+  shapeContainer = new ShapeContainer(this.messenger)
   eventPool = new EventPool()
   operationLayer: OperationLayer
   painter: Painter
@@ -30,19 +30,19 @@ class Stage {
       throw new Error('can not getContext 2d')
     }
     this.operationLayer = new OperationLayer(
-      this.eventEmitter,
+      this.messenger,
       this.shapeContainer,
       this.eventPool,
       this.getProperty.bind(this),
       ctx
     )
-    this.painter = new Painter(this.eventEmitter, this.shapeContainer, this.operationLayer, ctx)
+    this.painter = new Painter(this.messenger, this.shapeContainer, this.operationLayer, ctx)
   }
 
   add(shape: Shape, registerEventConfig?: RegisterEventConfig) {
     const proxy = this.shapeContainer.add(shape)
     proxy && this.eventPool.add(proxy, registerEventConfig)
-    this.eventEmitter.emit('repaint')
+    this.messenger.emit('repaint')
     return proxy
   }
 
@@ -50,7 +50,7 @@ class Stage {
     this.shapeContainer.remove(shape)
     this.operationLayer.removeSelectShapeChild(shape)
     this.eventPool.remove(shape)
-    this.eventEmitter.emit('repaint')
+    this.messenger.emit('repaint')
   }
 
   getProperty() {

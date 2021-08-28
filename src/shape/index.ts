@@ -1,15 +1,15 @@
 import type { Point } from './shape'
 import { Shape } from './shape'
-import type { EventEmitter } from '../eventEmitter'
+import type { Messenger } from '../messenger'
 
 export class ShapeContainer {
   private layerMap = new Map<number, Array<ShapeProxy>>()
   private cacheFlag = false
   private cacheList: ShapeProxy[] = []
-  private eventEmitter: EventEmitter
+  private messenger: Messenger
 
-  constructor(eventEmitter: EventEmitter) {
-    this.eventEmitter = eventEmitter
+  constructor(messenger: Messenger) {
+    this.messenger = messenger
   }
 
   add(shape: Shape) {
@@ -18,7 +18,7 @@ export class ShapeContainer {
     if (!this.layerMap.has(layer)) {
       this.layerMap.set(layer, [])
     }
-    const proxy = createShapeProxy(shape, this.eventEmitter)
+    const proxy = createShapeProxy(shape, this.messenger)
     this.layerMap.get(layer)!.push(proxy)
     this.cacheFlag = true
     return proxy
@@ -77,7 +77,7 @@ export class ShapeContainer {
   }
 }
 
-const createShapeProxy = (shape: Shape, eventEmitter: EventEmitter): ShapeProxy => {
+const createShapeProxy = (shape: Shape, messenger: Messenger): ShapeProxy => {
   const proxy = new Proxy(shape, {
     get(target, key, receiver) {
       if (key == 'origin') return target
@@ -86,7 +86,7 @@ const createShapeProxy = (shape: Shape, eventEmitter: EventEmitter): ShapeProxy 
     set(target, key, value, receive) {
       const flag = Reflect.set(target, key, value, receive)
       if (target.getRepaintKeys().includes(key as string)) {
-        eventEmitter.emit('repaint')
+        messenger.emit('repaint')
       }
       return flag
     },

@@ -1,11 +1,11 @@
-import type { EventEmitter } from '../eventEmitter'
+import type { Messenger } from '../messenger'
 import type { ShapeContainer, ShapeProxy, Group } from '../shape'
 import type { OperationLayer } from '../operation'
 
 export class Painter {
   private canvas: HTMLCanvasElement
   private ctx: CanvasRenderingContext2D
-  private eventEmitter: EventEmitter
+  private messenger: Messenger
   private shapeContainer: ShapeContainer
   private operationLayer: OperationLayer
   private repaintTimer: number | null = null
@@ -15,12 +15,12 @@ export class Painter {
   private eidtShapeProxy: EditShapeProxy
 
   constructor(
-    eventEmitter: EventEmitter,
+    messenger: Messenger,
     shapeContainer: ShapeContainer,
     operationLayer: OperationLayer,
     ctx: CanvasRenderingContext2D
   ) {
-    this.eventEmitter = eventEmitter
+    this.messenger = messenger
     this.shapeContainer = shapeContainer
     this.operationLayer = operationLayer
     this.ctx = ctx
@@ -31,10 +31,8 @@ export class Painter {
 
   paint() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-    this.shapeContainer.toList().forEach((shape) => {
-      shape.paint(this.ctx)
-      this.eidtShapeProxy.paintEditStatus(this.ctx)
-    })
+    this.shapeContainer.toList().forEach((shape) => shape.paint(this.ctx))
+    this.eidtShapeProxy.paintEditStatus(this.ctx)
   }
 
   handle() {
@@ -47,7 +45,7 @@ export class Painter {
         this.repaintTimer = null
       }
     }
-    this.eventEmitter.on('repaint', () => {
+    this.messenger.on('repaint', () => {
       this.isNeedRepaint = true
       clearTimeout(this.cancelRepaintTimer)
       this.cancelRepaintTimer = setTimeout(() => {

@@ -6,6 +6,8 @@ const stage = createStage('#canvas', {
   draggable: true,
 })
 
+stage.canvas.style.backgroundColor = 'antiquewhite'
+
 const a = new Rectangle({
   x: 0,
   y: 0,
@@ -47,7 +49,9 @@ const c = new Rectangle({
   draggable: true,
 })
 stage.add(c, {
-  clickShape() {},
+  click() {
+    this.fillStyle = 'black'
+  },
 })
 
 const d = new Rectangle({
@@ -62,17 +66,17 @@ const d = new Rectangle({
 
 stage.add(d)
 
-const { eventEmitter } = stage
+const { messenger } = stage
 
-eventEmitter.on('enterShape', (shape) => {
+messenger.on('enterShape', (shape) => {
   // console.log('enterShape', shape.fillStyle)
 })
 
-eventEmitter.on('leaveShape', (shape) => {
+messenger.on('leaveShape', (shape) => {
   // console.log('leaveShape', shape.fillStyle)
 })
 
-eventEmitter.on('clickShape', (shape) => {
+messenger.on('clickShape', (shape) => {
   // console.log(stage.operationLayer.getSelectedShape().layer)
 })
 
