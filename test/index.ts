@@ -9,13 +9,15 @@ const stage = createStage('#canvas', {
 stage.canvas.style.backgroundColor = 'antiquewhite'
 
 const a = new Rectangle({
-  x: 0,
+  x: 20,
   y: 0,
   w: 200,
   h: 100,
   fillStyle: 'red',
   layer: 2,
 })
+
+const proxyA = stage.add(a)
 
 const b = new Rectangle({
   x: 50,
@@ -30,8 +32,10 @@ const b = new Rectangle({
   draggable: true,
 })
 
+const proxyB = stage.add(b)
+
 const group = new Group({
-  children: [a, b],
+  children: [proxyA, proxyB],
   editable: true,
   draggable: true,
 })
@@ -68,11 +72,9 @@ stage.add(d)
 
 const { messenger } = stage
 
-messenger.on('enterShape', (shape) => {
-  // console.log('enterShape', shape.fillStyle)
-})
+messenger.on('enterShape', (shape) => {})
 
-messenger.on('leaveShape', (shape) => {
+messenger.on('dragShape', (shape) => {
   // console.log('leaveShape', shape.fillStyle)
 })
 
@@ -80,4 +82,4 @@ messenger.on('clickShape', (shape) => {
   // console.log(stage.operationLayer.getSelectedShape().layer)
 })
 
-console.log(stage)
+console.log(stage.shapeContainer)

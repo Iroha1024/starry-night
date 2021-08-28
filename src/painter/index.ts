@@ -66,7 +66,6 @@ class EditShapeProxy {
   }
 
   paintEditStatus(ctx: CanvasRenderingContext2D) {
-    this.shape.calculateBoundingBox()
     if (this.shape.width == 0 || this.shape.height == 0) return
     const EDIT_POINT_WIDTH = 12
     const HALF = EDIT_POINT_WIDTH / 2

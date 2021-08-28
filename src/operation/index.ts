@@ -40,8 +40,10 @@ export class OperationLayer {
       new Group({
         children: [],
         editable: true,
+        draggable: true,
+        layer: -100,
       })
-    ) as ShapeProxy<Group>
+    )
   }
 
   private initEvent() {
@@ -126,7 +128,7 @@ export class OperationLayer {
 
   mousedownShape(shape: ShapeProxy) {
     this.selectedShape.clearChild()
-    this.selectedShape.addChild(shape.origin)
+    this.selectedShape.addChild(shape)
     this.messenger.emit('mousedownShape', shape)
     this.transfer('mousedown', shape)
   }
@@ -193,7 +195,13 @@ export class OperationLayer {
   dragCanvas(event: MouseEvent) {
     if (this.getStageProperty().draggable) {
       const { movementX, movementY } = event
-      this.shapeContainer.toList().forEach((shape) => shape.move(movementX, movementY))
+      const blackList = this.shapeContainer
+        .toList()
+        .filter((shape) => shape.origin instanceof Group)
+        .flatMap((group) => (group as ShapeProxy<Group>).children)
+      this.shapeContainer
+        .toList()
+        .forEach((shape) => !blackList.includes(shape) && shape.move(movementX, movementY))
       this.messenger.emit('dragCanvas')
     }
   }
@@ -228,7 +236,7 @@ export class OperationLayer {
   }
 
   removeSelectShapeChild(shape: ShapeProxy) {
-    this.selectedShape.removeChild(shape.origin)
+    this.selectedShape.removeChild(shape)
   }
 
   getSelectedShape() {

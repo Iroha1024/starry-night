@@ -17,7 +17,6 @@ export interface ShapeConfig {
 }
 
 export class Shape {
-  readonly origin: Shape
   private _x: number
   private _y: number
   private _width: number

@@ -1,3 +1,4 @@
+import type { ShapeProxy } from './index'
 import { Shape } from './shape'
 import type { RectangleConfig } from './rectangle'
 import { Rectangle } from './rectangle'
@@ -7,11 +8,11 @@ interface GroupConfig extends Omit<RectangleConfig, 'x' | 'y' | 'w' | 'h'> {
   y?: number
   w?: number
   h?: number
-  children: Array<Shape>
+  children: Array<ShapeProxy>
 }
 
 export class Group extends Rectangle {
-  private _children: Array<Shape>
+  private _children: Array<ShapeProxy> = []
 
   constructor(config: GroupConfig) {
     const defaultConfig = {
@@ -25,16 +26,16 @@ export class Group extends Rectangle {
       ...config,
     })
     const { children } = config
-    this.children = children
+    children.forEach((child) => this.addChild(child))
     this.setLayer()
     this.calculateBoundingBox()
   }
 
-  public get children(): Array<Shape> {
+  public get children(): Array<ShapeProxy> {
     return this._children
   }
 
-  public set children(value: Array<Shape>) {
+  public set children(value: Array<ShapeProxy>) {
     this._children = value
   }
 
@@ -45,23 +46,23 @@ export class Group extends Rectangle {
 
   setLayer() {
     if (this.children.length == 0) return
-    let max = this.children[0]
+    let min = this.children[0]
     for (let i = 1; i < this.children.length; i++) {
-      if (Shape.compare(max, this.children[i]) < 0) {
-        max = this.children[i]
+      if (Shape.compare(min.origin, this.children[i].origin) > 0) {
+        min = this.children[i]
       }
     }
-    this.layer = max.layer
-    this.order = max.order
+    this.layer = min.layer
+    this.order = min.order - 1
   }
 
-  addChild(shape: Shape) {
-    if (this.hasChild(shape) || !shape.editable) return
+  addChild(shape: ShapeProxy) {
+    if (this.hasChild(shape)) return
     this.children.push(shape)
     this.setLayer()
   }
 
-  removeChild(shape: Shape) {
+  removeChild(shape: ShapeProxy) {
     if (!this.hasChild(shape)) return
     const index = this.children.indexOf(shape)
     this.children.splice(index, 1)
@@ -73,7 +74,7 @@ export class Group extends Rectangle {
     this.setLayer()
   }
 
-  hasChild(shape: Shape) {
+  hasChild(shape: ShapeProxy) {
     return this.children.findIndex((item) => item == shape) != -1
   }
 
@@ -108,19 +109,17 @@ export class Group extends Rectangle {
     this.x = minX
     this.y = minY
     this.width = maxX - minX + width
-    this.height = maxY - minY + +height
+    this.height = maxY - minY + height
   }
 
   override paint(ctx: CanvasRenderingContext2D) {
+    this.calculateBoundingBox()
     this.rawPaint(ctx, () => {
       ctx.rect(this.x, this.y, this.width, this.height)
-      this.children.forEach((shape) => shape.paint(ctx))
     })
   }
 
   override move(movementX: number, movementY: number) {
-    this.x += movementX
-    this.y += movementY
     this.children.forEach((shape) => shape.move(movementX, movementY))
   }
 }

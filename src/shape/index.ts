@@ -12,20 +12,22 @@ export class ShapeContainer {
     this.messenger = messenger
   }
 
-  add(shape: Shape) {
-    if (this.has(shape)) return
+  add<S extends Shape>(shape: S) {
+    if (this.has(shape)) {
+      return this.toList().find((item) => item.origin == shape) as ShapeProxy<S>
+    }
     const { layer } = shape
     if (!this.layerMap.has(layer)) {
       this.layerMap.set(layer, [])
     }
-    const proxy = createShapeProxy(shape, this.messenger)
+    const proxy = this.createShapeProxy(shape)
     this.layerMap.get(layer)!.push(proxy)
     this.cacheFlag = true
     return proxy
   }
 
   remove(shape: ShapeProxy) {
-    if (!this.has(shape)) return false
+    if (!this.has(shape.origin)) return false
     const { layer } = shape
     const shapeList = this.layerMap.get(layer)!
     const index = shapeList.indexOf(shape)
@@ -34,8 +36,8 @@ export class ShapeContainer {
     return true
   }
 
-  has(shape: ShapeProxy) {
-    return this.toList().findIndex((item) => item == shape) != -1
+  has(shape: Shape) {
+    return this.toList().findIndex((item) => item.origin == shape) != -1
   }
 
   /**
@@ -51,8 +53,8 @@ export class ShapeContainer {
     layerList.sort((a, b) => a - b)
     layerList.forEach((layer) => {
       const shapeList = this.layerMap.get(layer)!
-      ;[...shapeList].sort((a, b) => Shape.compare(a.origin, b.origin))
-      this.cacheList.push(...shapeList)
+      const data = [...shapeList].sort((a, b) => Shape.compare(a.origin, b.origin))
+      this.cacheList.push(...data)
     })
     this.cacheFlag = false
     return this.cacheList
@@ -75,26 +77,31 @@ export class ShapeContainer {
     }
     return null
   }
+
+  createShapeProxy<S extends Shape>(shape: S): ShapeProxy<S> {
+    const messenger = this.messenger
+
+    const proxy = new Proxy(shape, {
+      get(target, key, receiver) {
+        if (key == 'origin') return target
+        return Reflect.get(target, key, receiver)
+      },
+      set(target, key, value, receive) {
+        const old = target[key]
+        const flag = Reflect.set(target, key, value, receive)
+        if (target.getRepaintKeys().includes(key as string) && old != value) {
+          messenger.emit('repaint')
+        }
+        return flag
+      },
+    }) as any
+    return proxy
+  }
 }
 
-const createShapeProxy = (shape: Shape, messenger: Messenger): ShapeProxy => {
-  const proxy = new Proxy(shape, {
-    get(target, key, receiver) {
-      if (key == 'origin') return target
-      return Reflect.get(target, key, receiver)
-    },
-    set(target, key, value, receive) {
-      const flag = Reflect.set(target, key, value, receive)
-      if (target.getRepaintKeys().includes(key as string)) {
-        messenger.emit('repaint')
-      }
-      return flag
-    },
-  })
-  return proxy
+export type ShapeProxy<S extends Shape = Shape> = { [k in keyof S]: S[k] } & {
+  readonly origin: Shape
 }
-
-export type ShapeProxy<S extends Shape = Shape> = { [k in keyof S]: S[k] }
 export { Shape } from './shape'
 export type { ShapeConfig, Point } from './shape'
 export { Rectangle } from './rectangle'

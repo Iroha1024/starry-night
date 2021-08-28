@@ -39,7 +39,7 @@ class Stage {
     this.painter = new Painter(this.messenger, this.shapeContainer, this.operationLayer, ctx)
   }
 
-  add(shape: Shape, registerEventConfig?: RegisterEventConfig) {
+  add<S extends Shape>(shape: S, registerEventConfig?: RegisterEventConfig) {
     const proxy = this.shapeContainer.add(shape)
     proxy && this.eventPool.add(proxy, registerEventConfig)
     this.messenger.emit('repaint')
